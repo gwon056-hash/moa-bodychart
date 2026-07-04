@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MOA Bodychart | MOA BUSAN</title>
+<meta name="theme-color" content="#0B0B0B">
+<meta name="description" content="MOA BUSAN의 모바일 최적화 통증 바디차트 및 자세·정렬 관찰 웹앱">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MOA Bodychart">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+
+<style>
+  :root{
+    --ink:#141414; --line:#E3E3E3; --bg:#F3F3F3; --sub:#555; --faint:#8A8A8A;
+    --black:#0B0B0B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    -webkit-tap-highlight-color:transparent;}
+  button{font-family:inherit;cursor:pointer}
+  input,textarea{font-family:inherit}
+  html{min-width:0;background:var(--bg);overflow-x:hidden}
+  body{min-width:0;min-height:100dvh;overflow-x:hidden;overscroll-behavior-y:none}
+  button,input,textarea{touch-action:manipulation}
+
+  /* ── 헤더 ── */
+  .topbar{background:var(--black);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .title-block h1{margin:0;font-size:21px;font-weight:800;letter-spacing:.01em;line-height:1.2}
+  .brand-line{display:flex;align-items:center;gap:8px;margin-top:7px}
+  .brand-line img{width:26px;height:26px;border-radius:6px;object-fit:cover}
+  .brand-line span{font-size:11px;color:#BBBBBB;letter-spacing:.08em;font-weight:600}
+  .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn-solid{padding:10px 16px;border-radius:10px;border:none;background:#FFFFFF;color:var(--black);font-weight:800;font-size:13px}
+  .btn-ghost{padding:10px 16px;border-radius:10px;border:1.5px solid #555;background:transparent;color:#DDD;font-weight:700;font-size:13px}
+
+  /* ── 탭 ── */
+  .tabs{display:flex;gap:6px;padding:14px 20px 0}
+  .tab{padding:10px 22px;border-radius:12px 12px 0 0;border:1px solid var(--line);border-bottom:none;background:#E2E2E2;font-weight:600;font-size:14px;color:#777}
+  .tab.active{background:#fff;font-weight:800;color:var(--black)}
+  .sheet{margin:0 20px 14px;background:#fff;border:1px solid var(--line);border-radius:0 14px 14px 14px;padding:18px}
+
+  .main-grid{display:grid;grid-template-columns:minmax(230px,300px) 1fr;gap:18px}
+  .fig-grid{display:grid;grid-template-columns:repeat(2,minmax(0,250px));gap:14px;align-items:start}
+  .fig-grid>div{min-width:0}
+  .pain-grid .tools-wrap{grid-column:1;grid-row:1}
+  .pain-grid .rest-wrap{grid-column:1;grid-row:2}
+  .pain-grid .fig-col{grid-column:2;grid-row:1 / span 2}
+
+  /* ── 모바일 최적화 ── */
+  @media(max-width:900px){
+    .topbar{padding:calc(12px + env(safe-area-inset-top)) 12px 12px;gap:10px}
+    .title-block{width:100%;min-width:0}
+    .title-block h1{font-size:18px;line-height:1.25}
+    .brand-line{margin-top:6px;gap:7px;min-width:0}
+    .brand-line img{width:22px;height:22px;border-radius:5px;flex:0 0 auto}
+    .brand-line span{font-size:9.5px;letter-spacing:.045em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:100%}
+    .top-actions button{min-width:0;min-height:44px;padding:8px 5px;border-radius:10px;font-size:12px;line-height:1.15;white-space:normal}
+
+    .tabs{position:sticky;top:0;z-index:30;display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px 8px 0;background:var(--bg)}
+    .tab{min-height:44px;padding:9px 6px;border-radius:11px 11px 0 0;font-size:13px;line-height:1.2}
+    .sheet{margin:0 8px 12px;padding:10px;border-radius:0 12px 12px 12px}
+
+    .main-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+    .pain-grid .tools-wrap,.pain-grid .rest-wrap,.pain-grid .fig-col{grid-column:1;grid-row:auto}
+    .fig-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%;max-width:520px;margin:0 auto}
+
+    .card{padding:12px;border-radius:12px;margin-bottom:10px}
+    .lbl{font-size:12px;margin-bottom:7px}
+    .tools{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+    .tool-btn{min-height:64px;padding:8px 4px;gap:4px;flex-direction:column;justify-content:center;text-align:center;border-width:1.5px}
+    .tool-btn .sym{width:auto;font-size:18px;line-height:1}
+    .tool-btn .nm{font-size:11px;line-height:1.2;word-break:keep-all}
+    .hint{font-size:11px;margin-top:8px;line-height:1.45}
+    .radiate-status{margin-top:8px;padding:9px 10px;font-size:12px}
+    .row2{gap:7px;margin-top:8px}
+    .btn-sm{min-height:44px;padding:9px 7px;font-size:12.5px}
+
+    .nrs-row{gap:10px}
+    .nrs-row input[type=range]{min-height:36px}
+    .nrs-badge{min-width:54px;padding:7px 0;font-size:16px}
+    .fld{min-height:46px;padding:11px 12px;font-size:16px;margin-bottom:8px}
+    textarea.fld{min-height:96px}
+
+    .seg-item{margin-bottom:10px}
+    .seg-title{font-size:12px;margin-bottom:5px}
+    .seg{gap:4px}
+    .seg button{min-height:42px;padding:7px 3px;font-size:11.5px;line-height:1.2}
+    .findings ul{font-size:12.5px;line-height:1.7}
+
+    svg.fig{touch-action:pan-y}
+    .footer{padding:5px 12px calc(20px + env(safe-area-inset-bottom));font-size:10.5px}
+    .toast{bottom:calc(16px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px);padding:10px 14px;text-align:center;font-size:12.5px}
+
+    .recovery-banner{margin:8px 8px 0;padding:11px 12px;align-items:flex-start;flex-direction:column}
+    .recovery-banner .acts{width:100%}
+    .recovery-banner button{flex:1;min-height:42px}
+
+    .modal-backdrop{align-items:flex-end;padding:0}
+    .modal{width:100%;max-width:none;border-radius:20px 20px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom))}
+    .modal-actions button{min-height:46px}
+  }
+
+  @media(max-width:360px){
+    .title-block h1{font-size:17px}
+    .top-actions button{font-size:11px}
+    .tool-btn .nm{font-size:10.5px}
+    .seg button{font-size:10.8px}
+    .sheet{margin-left:6px;margin-right:6px;padding:8px}
+  }
+
+  @media(min-width:901px) and (max-width:1120px){
+    .main-grid{grid-template-columns:minmax(220px,270px) 1fr}
+    .fig-grid{grid-template-columns:repeat(2,minmax(0,230px))}
+  }
+
+  .card{background:#fff;border-radius:14px;border:1px solid var(--line);padding:16px;margin-bottom:14px}
+  .card:last-child{margin-bottom:0}
+  .lbl{font-size:12px;font-weight:800;color:var(--sub);margin-bottom:8px;display:block;letter-spacing:.04em}
+  .fld{width:100%;padding:10px 11px;border-radius:9px;border:1.5px solid var(--line);font-size:14px;color:var(--ink);outline:none;background:#fff;margin-bottom:9px}
+  .fld:focus{border-color:var(--black)}
+  textarea.fld{min-height:84px;resize:vertical;margin-bottom:0}
+
+  /* 도구 버튼 */
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .tool-btn{display:flex;align-items:center;gap:8px;padding:11px 10px;border-radius:10px;border:2px solid #E8E8E8;background:#fff;text-align:left}
+  .tool-btn .sym{font-size:16px;font-weight:800;width:20px;text-align:center}
+  .tool-btn .nm{font-size:12.5px;font-weight:600;color:var(--sub);line-height:1.25}
+  .tool-btn.active .nm{font-weight:800;color:var(--ink)}
+  .hint{font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.5}
+  .radiate-status{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:#FFF7ED;border:1.5px solid #FED7AA;color:#B45309;font-size:12.5px;font-weight:800;line-height:1.35}
+  .row2{display:flex;gap:8px;margin-top:12px}
+  .btn-sm{flex:1;padding:9px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:700;color:var(--ink)}
+  .btn-sm:disabled{color:#C4C4C4;cursor:default}
+  .btn-sm.danger{border-color:#E7CFCF;color:#B23A3A}
+  .btn-sm.danger:disabled{color:#C4C4C4}
+
+  /* NRS */
+  .nrs-row{display:flex;align-items:center;gap:12px}
+  .nrs-row input[type=range]{flex:1}
+  .nrs-badge{min-width:58px;text-align:center;padding:6px 0;border-radius:9px;font-weight:800;font-size:16px}
+
+  /* 세그먼트 */
+  .seg{display:flex;gap:4px}
+  .seg button{flex:1;padding:8px 2px;font-size:12px;font-weight:500;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--sub)}
+  .seg button.on{border-color:var(--black);background:var(--black);color:#fff;font-weight:700}
+  .seg-item{margin-bottom:11px}
+  .seg-item:last-child{margin-bottom:0}
+  .seg-title{font-size:12.5px;font-weight:700;margin-bottom:5px}
+
+  .findings{background:#F7F7F7}
+  .findings ul{margin:0;padding-left:18px;font-size:13px;line-height:1.8}
+  .findings .none{font-size:13px;color:#8A8A8A}
+
+  svg.fig{width:100%;display:block;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  #pane-pain svg.fig{cursor:crosshair}
+
+  .footer{text-align:center;padding:6px 20px 26px;font-size:11.5px;color:#9A9A9A;letter-spacing:.03em}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0B0B0B;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:50;display:none}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .modal{width:min(420px,100%);background:#fff;border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h3{margin:0 0 8px;font-size:18px}
+  .modal p{margin:0;color:var(--sub);font-size:13px;line-height:1.6;white-space:pre-line}
+  .modal-actions{display:flex;gap:8px;margin-top:18px}
+  .modal-actions button{flex:1;padding:11px 12px;border-radius:10px;font-size:13px;font-weight:800}
+  .modal-cancel{border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+  .modal-confirm{border:none;background:#0B0B0B;color:#fff}
+  .modal-confirm.danger{background:#B23A3A}
+  .recovery-banner{display:none;margin:12px 20px 0;background:#FFF8E8;border:1px solid #E9D9AA;border-radius:12px;padding:12px 14px;align-items:center;justify-content:space-between;gap:12px}
+  .recovery-banner .txt{font-size:12.5px;color:#6B5A2E;line-height:1.5}
+  .recovery-banner .acts{display:flex;gap:6px;flex-shrink:0}
+  .recovery-banner button{padding:8px 10px;border-radius:8px;border:1px solid #D6C58F;background:#fff;font-size:12px;font-weight:700}
+
+  /* ── PWA · 저장/공유 · 업데이트 ── */
+  .utility-banner{display:none;margin:10px 20px 0;border-radius:13px;padding:12px 14px;align-items:center;justify-content:space-between;gap:12px}
+  .utility-banner .txt{font-size:12.5px;line-height:1.5}
+  .utility-banner .acts{display:flex;gap:6px;flex-shrink:0}
+  .utility-banner button{padding:8px 11px;border-radius:9px;font-size:12px;font-weight:800}
+  .update-banner{background:#EEF5FF;border:1px solid #C7DAF7;color:#23476F}
+  .update-banner button{border:1px solid #AFC9ED;background:#fff;color:#23476F}
+  .privacy-banner{background:#F7F7F7;border:1px solid #DDDDDD;color:#555}
+  .privacy-banner button{border:1px solid #D0D0D0;background:#fff;color:#222}
+  .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:120}
+  .action-sheet{width:min(460px,100%);background:#fff;border-radius:20px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.32)}
+  .action-sheet h3{margin:0 0 6px;font-size:18px}
+  .action-sheet .sub{margin:0 0 14px;color:var(--sub);font-size:12.5px;line-height:1.55}
+  .sheet-list{display:grid;gap:8px}
+  .sheet-option{width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:13px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink)}
+  .sheet-option .main{font-size:14px;font-weight:800}
+  .sheet-option .desc{font-size:11.5px;color:var(--faint);margin-top:3px;line-height:1.35}
+  .sheet-option .chev{font-size:18px;color:#999}
+  .sheet-close{width:100%;margin-top:10px;min-height:44px;border:1.5px solid var(--line);background:#F8F8F8;border-radius:12px;font-size:13px;font-weight:800}
+  .preview-modal{width:min(760px,100%);max-height:calc(100dvh - 36px);background:#fff;border-radius:20px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.35);display:flex;flex-direction:column}
+  .preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .preview-head h3{margin:0;font-size:17px}
+  .icon-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:19px}
+  .preview-stage{min-height:0;overflow:auto;background:#EFEFEF;border-radius:14px;padding:10px;text-align:center}
+  .preview-stage img{display:block;max-width:100%;height:auto;margin:0 auto;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+  .preview-note{font-size:11.5px;color:#777;line-height:1.5;margin:10px 2px 0}
+  .preview-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .preview-actions button{min-height:46px;border-radius:12px;font-size:13px;font-weight:800}
+  .preview-share{border:none;background:#0B0B0B;color:#fff}
+  .preview-download{border:1.5px solid var(--line);background:#fff;color:var(--ink)}
+  .menu-group{display:grid;gap:8px}
+  .menu-footer{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:#888;line-height:1.55}
+  .status-line{display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:#2E8B57;display:inline-block;margin-right:6px}
+  .status-dot.offline{background:#B87900}
+  .busy-overlay{position:fixed;inset:0;background:rgba(255,255,255,.72);display:none;align-items:center;justify-content:center;z-index:160;backdrop-filter:blur(3px)}
+  .busy-card{background:#111;color:#fff;border-radius:14px;padding:14px 18px;font-size:13px;font-weight:700;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+  .version-chip{font-size:10.5px;color:#8F8F8F;margin-top:3px}
+
+  @media(max-width:900px){
+    .utility-banner{margin:8px 8px 0;padding:11px 12px;align-items:flex-start;flex-direction:column}
+    .utility-banner .acts{width:100%}
+    .utility-banner button{flex:1;min-height:42px}
+    .sheet-backdrop{align-items:flex-end;padding:0}
+    .action-sheet,.preview-modal{width:100%;max-width:none;border-radius:20px 20px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom))}
+    .preview-modal{max-height:94dvh}
+    .preview-stage{max-height:62dvh}
+  }
+
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="title-block">
+    <h1>바디차트 · 자세·정렬 관찰</h1>
+    <div class="brand-line">
+      <img src="data:image/jpeg;base64,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" alt="MOA BUSAN">
+      <span>MOA BUSAN · EVIDENCE · TOGETHER · EXCELLENCE</span>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="btn-ghost" onclick="requestNewEvaluation()">새 평가</button>
+    <button class="btn-solid" onclick="openExportSheet()">사진 저장</button>
+    <button class="btn-ghost" onclick="openMoreSheet()">더보기</button>
+  </div>
+</div>
+
+<div class="recovery-banner" id="recoveryBanner">
+  <div class="txt"><b>이전 작업이 남아 있습니다.</b><br>복구하면 마지막 자동저장 상태로 돌아갑니다.</div>
+  <div class="acts"><button onclick="discardRecovery()">삭제</button><button onclick="restoreRecovery()">복구</button></div>
+</div>
+
+<div class="utility-banner update-banner" id="updateBanner">
+  <div class="txt"><b>새 업데이트가 있습니다.</b><br><span id="updateText">업데이트 전 백업을 권장합니다.</span></div>
+  <div class="acts"><button onclick="exportBackup()">백업</button><button onclick="applyAppUpdate()">업데이트</button></div>
+</div>
+
+<div class="utility-banner privacy-banner" id="privacyBanner">
+  <div class="txt"><b>데이터 안내</b><br>입력 내용은 이 기기 브라우저에만 저장됩니다. 공용 배포판에서는 환자 실명보다 이름/코드 사용을 권장하며, 앱 삭제·브라우저 데이터 삭제·기기 변경 전 백업이 필요합니다.</div>
+  <div class="acts"><button onclick="dismissPrivacyNotice()">확인</button></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-pain" onclick="setTab('pain')">통증 차트</button>
+  <button class="tab" id="tab-posture" onclick="setTab('posture')">자세·정렬 관찰</button>
+</div>
+
+<div class="sheet">
+  <!-- ── 통증 차트 ── -->
+  <div id="pane-pain">
+    <div class="main-grid pain-grid">
+      <div class="tools-wrap">
+        <div class="card">
+          <span class="lbl">표시 도구</span>
+          <div class="tools" id="tools"></div>
+          <div class="hint">그림을 터치하면 표시됩니다 · 방사통은 <b>시작점 → 끝점</b> 순서로 두 번 터치 · 지우개로 개별 삭제</div>
+          <div class="radiate-status" id="radiateStatus">① 방사통 시작점을 터치하세요</div>
+          <div class="row2">
+            <button class="btn-sm" id="btnUndo" onclick="undoAction()">↩ 되돌리기</button>
+            <button class="btn-sm" id="btnRedo" onclick="redoAction()">↪ 다시하기</button>
+          </div>
+          <div class="row2">
+            <button class="btn-sm danger" id="btnClear" onclick="requestClearMarks()">전체 지우기</button>
+          </div>
+        </div>
+      </div>
+      <div class="fig-grid fig-col">
+        <div id="fig-front"></div>
+        <div id="fig-back"></div>
+      </div>
+      <div class="rest-wrap">
+        <div class="card">
+          <span class="lbl">통증 강도 (NRS)</span>
+          <div class="nrs-row">
+            <input type="range" min="0" max="10" value="5" id="nrsSlider">
+            <div class="nrs-badge" id="nrsBadge">5</div>
+          </div>
+        </div>
+        <div class="card">
+          <span class="lbl">기록 정보</span>
+          <input class="fld" id="fName" placeholder="환자 이름/코드">
+          <input class="fld" id="fDate" type="date">
+          <input class="fld" id="fClinic" value="반여넘버원 마취통증의학과" placeholder="기관명">
+          <textarea class="fld" id="fMemo" placeholder="메모 (양상, 악화/완화 요인, 발생 시점 등)"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 신체 정렬 ── -->
+  <div id="pane-posture" style="display:none">
+    <div class="main-grid pain-grid">
+      <div class="tools-wrap">
+        <div class="card">
+          <span class="lbl">전면 관찰 (Frontal)</span>
+          <div id="segFront"></div>
+        </div>
+        <div class="card">
+          <span class="lbl">측면 관찰 (Sagittal)</span>
+          <div id="segSide"></div>
+        </div>
+      </div>
+      <div class="fig-grid fig-col">
+        <div id="fig-pfront"></div>
+        <div id="fig-pside"></div>
+      </div>
+      <div class="rest-wrap">
+        <div class="card findings">
+          <span class="lbl">관찰 소견 요약</span>
+          <div id="findingsBox"><div class="none">특이 소견 없음</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">MOA Bodychart PWA · © MOA BUSAN · @physio_geun_1<div class="version-chip" id="footerVersion">v1.0.0</div></div>
+
+
+<div class="sheet-backdrop" id="exportSheetBackdrop" onclick="sheetBackdropClose(event,'exportSheetBackdrop')">
+  <div class="action-sheet" role="dialog" aria-modal="true" aria-labelledby="exportSheetTitle">
+    <h3 id="exportSheetTitle">결과 이미지 저장</h3>
+    <p class="sub">저장할 범위를 선택하면 먼저 미리보기를 만든 뒤, 사진 저장·공유 또는 PNG 다운로드를 선택할 수 있습니다.</p>
+    <div class="sheet-list">
+      <button class="sheet-option" onclick="prepareExport(S.tab)">
+        <span><div class="main" id="currentTabSaveLabel">현재 탭 저장</div><div class="desc">지금 보고 있는 평가 결과만 이미지로 만듭니다.</div></span><span class="chev">›</span>
+      </button>
+      <button class="sheet-option" onclick="prepareExport('all')">
+        <span><div class="main">통합 리포트 저장</div><div class="desc">통증 차트와 자세·정렬 관찰을 한 장으로 만듭니다.</div></span><span class="chev">›</span>
+      </button>
+    </div>
+    <button class="sheet-close" onclick="closeSheet('exportSheetBackdrop')">닫기</button>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="previewBackdrop" onclick="sheetBackdropClose(event,'previewBackdrop')">
+  <div class="preview-modal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div class="preview-head"><h3 id="previewTitle">결과 이미지 미리보기</h3><button class="icon-close" onclick="closePreview()" aria-label="닫기">×</button></div>
+    <div class="preview-stage"><img id="exportPreviewImage" alt="MOA Bodychart 결과 이미지 미리보기"></div>
+    <div class="preview-note" id="previewNote">아이폰에서는 ‘사진 저장·공유’를 누른 뒤 공유창에서 ‘이미지 저장’을 선택하면 사진 앱에 저장할 수 있습니다.</div>
+    <div class="preview-actions">
+      <button class="preview-share" id="shareExportBtn" onclick="sharePreparedExport()">사진 저장·공유</button>
+      <button class="preview-download" onclick="downloadPreparedExport()">PNG 다운로드</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="moreSheetBackdrop" onclick="sheetBackdropClose(event,'moreSheetBackdrop')">
+  <div class="action-sheet" role="dialog" aria-modal="true" aria-labelledby="moreSheetTitle">
+    <h3 id="moreSheetTitle">웹앱 관리</h3>
+    <p class="sub">설치, 백업, 복원, 업데이트를 한곳에서 관리합니다.</p>
+    <div class="menu-group">
+      <button class="sheet-option" onclick="installWebApp()"><span><div class="main">홈 화면에 설치</div><div class="desc" id="installDesc">웹앱처럼 전체 화면으로 사용합니다.</div></span><span class="chev">›</span></button>
+      <button class="sheet-option" onclick="exportBackup()"><span><div class="main">데이터 백업</div><div class="desc">현재 작성 중인 평가를 JSON 파일로 저장합니다.</div></span><span class="chev">›</span></button>
+      <button class="sheet-option" onclick="triggerRestoreBackup()"><span><div class="main">백업 복원</div><div class="desc">저장해 둔 MOA Bodychart 백업 파일을 불러옵니다.</div></span><span class="chev">›</span></button>
+      <button class="sheet-option" onclick="checkForUpdates(true)"><span><div class="main">업데이트 확인</div><div class="desc">GitHub에 새 버전이 있는지 확인합니다.</div></span><span class="chev">›</span></button>
+    </div>
+    <div class="menu-footer">
+      <div class="status-line"><span><span class="status-dot" id="networkDot"></span><span id="networkText">온라인</span></span><span id="appVersionText">v1.0.0</span></div>
+      <div style="margin-top:6px">데이터는 이 기기에 저장됩니다. 업데이트·앱 삭제·기기 변경 전 백업을 권장합니다.</div>
+    </div>
+    <button class="sheet-close" onclick="closeSheet('moreSheetBackdrop')">닫기</button>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="installHelpBackdrop" onclick="sheetBackdropClose(event,'installHelpBackdrop')">
+  <div class="action-sheet" role="dialog" aria-modal="true" aria-labelledby="installHelpTitle">
+    <h3 id="installHelpTitle">홈 화면에 설치</h3>
+    <p class="sub" id="installHelpText">브라우저 메뉴에서 홈 화면 추가 또는 앱 설치를 선택하세요.</p>
+    <button class="sheet-close" onclick="closeSheet('installHelpBackdrop')">확인</button>
+  </div>
+</div>
+
+<input type="file" id="backupFileInput" accept="application/json,.json" style="display:none" onchange="handleBackupFile(this)">
+<div class="busy-overlay" id="busyOverlay"><div class="busy-card" id="busyText">처리 중...</div></div>
+
+<div class="modal-backdrop" id="confirmBackdrop" onclick="backdropCancel(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <h3 id="confirmTitle">확인</h3>
+    <p id="confirmMessage"></p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeConfirm(false)">취소</button>
+      <button class="modal-confirm" id="confirmOk" onclick="closeConfirm(true)">확인</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════ 상태 ════════ */
+
+const APP_VERSION = "1.0.0";
+const BACKUP_SCHEMA_VERSION = 1;
+const PRIVACY_NOTICE_KEY = "moaBodychartPrivacyNoticeV1";
+let swRegistration = null;
+let deferredInstallPrompt = null;
+let remoteVersionInfo = null;
+let updateAvailable = false;
+let controllerReloading = false;
+let preparedExport = null;
+const FONT = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif";
+const INK = "#141414", LINE = "#111111";
+const LOGO = "data:image/jpeg;base64,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";
+const CREDIT = "MOA Bodychart PWA · © MOA BUSAN · @physio_geun_1";
+
+const TOOLS = [
+  { id:"ache",    label:"둔통 · 쑤심",     color:"#E05252", hint:"●" },
+  { id:"sharp",   label:"예리한 통증",     color:"#B91C1C", hint:"✕" },
+  { id:"numb",    label:"저림 · 이상감각", color:"#7C5CBF", hint:"∴" },
+  { id:"radiate", label:"방사통",          color:"#E8830A", hint:"→" },
+  { id:"stiff",   label:"뻣뻣함 · 결림",   color:"#2563EB", hint:"▨" },
+  { id:"erase",   label:"지우개",          color:"#6B7280", hint:"⌫" },
+];
+const TOOL = Object.fromEntries(TOOLS.map(t=>[t.id,t]));
+
+const FRONT_LINES = [
+  { id:"head",     label:"머리 (귀 높이)", y:42,  x1:76, x2:144, opts:["좌측 기울임","정렬","우측 기울임"] },
+  { id:"shoulder", label:"어깨 높이",      y:90,  x1:58, x2:162, opts:["좌측 높음","정렬","우측 높음"] },
+  { id:"pelvis",   label:"골반 높이",      y:230, x1:64, x2:156, opts:["좌측 높음","정렬","우측 높음"] },
+  { id:"knee",     label:"무릎 높이",      y:332, x1:72, x2:148, opts:["좌측 높음","정렬","우측 높음"] },
+];
+const SIDE_ITEMS = [
+  { id:"fhp", label:"전방 머리 자세", opts:["정상","있음"] },
+  { id:"rs",  label:"둥근 어깨",      opts:["정상","있음"] },
+  { id:"tk",  label:"흉추 후만 증가", opts:["정상","있음"] },
+  { id:"ll",  label:"요추 전만",      opts:["감소","중립","증가"], three:true },
+  { id:"pt",  label:"골반 경사",      opts:["후방","중립","전방"], three:true },
+  { id:"khe", label:"무릎 과신전",    opts:["정상","있음"] },
+];
+
+const S = {
+  tab:"pain", tool:"ache", markers:[], nextId:1, nrs:5,
+  front:{head:0,shoulder:0,pelvis:0,knee:0},
+  side:{fhp:0,rs:0,tk:0,ll:0,pt:0,khe:0},
+};
+let radiateStart = null;
+let historyStack = [];
+let redoStack = [];
+let confirmResolver = null;
+let autosaveTimer = null;
+let pendingRecovery = null;
+const STORAGE_KEY = "moaBodychartDraftV2";
+
+const nrsColor = n => n>=7 ? "#C0392B" : n>=4 ? "#C77700" : "#1E7A4F";
+const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const todayStr = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+
+/* ════════ 인체 실루엣 ════════ */
+function limb(x1,y1,x2,y2,w){
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#2A2A2A" stroke-width="'+(w+3)+'" stroke-linecap="round"/>'
+       + '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#FDFDFD" stroke-width="'+w+'" stroke-linecap="round"/>';
+}
+function silhouette(view,faint){
+  let s = '<g opacity="'+(faint?0.3:1)+'">';
+  s += limb(76,94,60,162,15)+limb(60,162,53,224,12);
+  s += limb(144,94,160,162,15)+limb(160,162,167,224,12);
+  s += '<ellipse cx="51" cy="240" rx="7.5" ry="11" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.6"/>';
+  s += '<ellipse cx="169" cy="240" rx="7.5" ry="11" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.6"/>';
+  s += limb(95,240,92,332,20)+limb(92,332,90,412,13);
+  s += limb(125,240,128,332,20)+limb(128,332,130,412,13);
+  s += '<ellipse cx="88" cy="424" rx="11" ry="7.5" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.6"/>';
+  s += '<ellipse cx="132" cy="424" rx="11" ry="7.5" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.6"/>';
+  s += '<path d="M74,86 C74,80 92,74 110,74 C128,74 146,80 146,86 L144,122 C142,150 137,158 136,170 C135,188 140,206 141,222 C142,233 133,239 110,239 C87,239 78,233 79,222 C80,206 85,188 84,170 C83,158 78,150 76,122 Z" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.7"/>';
+  s += '<path d="M100,58 L100,76 C100,80 120,80 120,76 L120,58 Z" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.6"/>';
+  s += '<ellipse cx="110" cy="40" rx="21" ry="25" fill="#FDFDFD" stroke="#2A2A2A" stroke-width="1.7"/>';
+  if(view==="back"){
+    s += '<g stroke="#9A9A9A" stroke-width="1.4" fill="none">'
+       + '<line x1="110" y1="78" x2="110" y2="236" stroke-dasharray="3 4"/>'
+       + '<path d="M88,104 C94,116 96,126 94,136"/><path d="M132,104 C126,116 124,126 126,136"/></g>';
+  } else {
+    s += '<line x1="110" y1="130" x2="110" y2="236" stroke="#D5D5D5" stroke-width="1.2" stroke-dasharray="2 5"/>';
+  }
+  return s+'</g>';
+}
+
+/* ════════ 마커 ════════ */
+function markerSVG(m,prefix){
+  const c = TOOL[m.type].color;
+  if(m.type==="ache") return '<circle cx="'+m.x+'" cy="'+m.y+'" r="7" fill="'+c+'" fill-opacity="0.82" stroke="#fff" stroke-width="1.5"/>';
+  if(m.type==="sharp") return '<g stroke="'+c+'" stroke-width="3.2" stroke-linecap="round">'
+    +'<line x1="'+(m.x-6)+'" y1="'+(m.y-6)+'" x2="'+(m.x+6)+'" y2="'+(m.y+6)+'"/>'
+    +'<line x1="'+(m.x-6)+'" y1="'+(m.y+6)+'" x2="'+(m.x+6)+'" y2="'+(m.y-6)+'"/></g>';
+  if(m.type==="numb") return '<g fill="'+c+'"><circle cx="'+m.x+'" cy="'+(m.y-4)+'" r="2.6"/>'
+    +'<circle cx="'+(m.x-4.5)+'" cy="'+(m.y+3.5)+'" r="2.6"/><circle cx="'+(m.x+4.5)+'" cy="'+(m.y+3.5)+'" r="2.6"/></g>';
+  if(m.type==="stiff") return '<g><rect x="'+(m.x-7)+'" y="'+(m.y-7)+'" width="14" height="14" rx="2.5" fill="none" stroke="'+c+'" stroke-width="2.2"/>'
+    +'<line x1="'+(m.x-6)+'" y1="'+(m.y+5)+'" x2="'+(m.x+5)+'" y2="'+(m.y-6)+'" stroke="'+c+'" stroke-width="2"/>'
+    +'<line x1="'+(m.x-2)+'" y1="'+(m.y+6)+'" x2="'+(m.x+6)+'" y2="'+(m.y-2)+'" stroke="'+c+'" stroke-width="2"/></g>';
+  if(m.type==="radiate") return '<g><circle cx="'+m.x+'" cy="'+m.y+'" r="4" fill="'+c+'"/>'
+    +'<line x1="'+m.x+'" y1="'+m.y+'" x2="'+m.x2+'" y2="'+m.y2+'" stroke="'+c+'" stroke-width="3.4" stroke-linecap="round" marker-end="url(#arrow-'+prefix+')"/></g>';
+  return "";
+}
+
+/* ════════ 통증 차트 SVG ════════ */
+function painFigureSVG(view,prefix,markers){
+  const title = view==="front" ? "전면 (Anterior)" : "후면 (Posterior)";
+  const lft = "L", rgt = "R";
+  let s = '<svg class="fig" data-view="'+view+'" viewBox="0 0 220 470" xmlns="http://www.w3.org/2000/svg">';
+  s += '<defs><marker id="arrow-'+prefix+'" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">'
+     + '<path d="M0,0 L10,5 L0,10 Z" fill="#E8830A"/></marker>'
+     + '<pattern id="grid-'+prefix+'" width="22" height="22" patternUnits="userSpaceOnUse">'
+     + '<path d="M22,0 L0,0 0,22" fill="none" stroke="#000000" stroke-opacity="0.05" stroke-width="1"/></pattern></defs>';
+  s += '<rect width="220" height="470" fill="#FFFFFF"/>';
+  s += '<rect width="220" height="470" fill="url(#grid-'+prefix+')"/>';
+  s += '<rect x="0.8" y="0.8" width="218.4" height="468.4" fill="none" stroke="#DADADA" stroke-width="1.6" rx="6"/>';
+  s += '<text x="110" y="462" text-anchor="middle" font-family="'+FONT+'" font-size="12" fill="#555555" font-weight="600">'+title+'</text>';
+  s += '<text x="14" y="452" font-family="'+FONT+'" font-size="9" fill="#A8A8A8">'+lft+'</text>';
+  s += '<text x="206" y="452" text-anchor="end" font-family="'+FONT+'" font-size="9" fill="#A8A8A8">'+rgt+'</text>';
+  s += silhouette(view,false);
+  s += '<g id="mk-'+prefix+'">'+markers.filter(m=>m.view===view).map(m=>markerSVG(m,prefix)).join("")+'</g>';
+  s += '<circle id="rs-'+prefix+'" cx="0" cy="0" r="7" fill="#E8830A" fill-opacity="0.2" stroke="#E8830A" stroke-width="2.5" style="display:none"/>';
+  s += '</svg>';
+  return s;
+}
+
+/* ════════ 정렬 SVG ════════ */
+function postureFrontSVG(front){
+  let s = '<svg class="fig" viewBox="0 0 220 470" xmlns="http://www.w3.org/2000/svg">';
+  s += '<rect width="220" height="470" fill="#FFFFFF"/>';
+  s += '<rect x="0.8" y="0.8" width="218.4" height="468.4" fill="none" stroke="#DADADA" stroke-width="1.6" rx="6"/>';
+  s += silhouette("front",true);
+  s += '<line x1="110" y1="12" x2="110" y2="438" stroke="'+LINE+'" stroke-width="1.2" stroke-dasharray="6 5" opacity="0.55"/>';
+  FRONT_LINES.forEach(ln=>{
+    const v = front[ln.id]||0;
+    const angle = v * 4;
+    const col = v!==0 ? "#C0392B" : "#3A3A3A";
+    s += '<g transform="rotate('+angle+' 110 '+ln.y+')">'
+       + '<line x1="'+ln.x1+'" y1="'+ln.y+'" x2="'+ln.x2+'" y2="'+ln.y+'" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round"/>'
+       + '<circle cx="'+ln.x1+'" cy="'+ln.y+'" r="3.2" fill="'+col+'"/><circle cx="'+ln.x2+'" cy="'+ln.y+'" r="3.2" fill="'+col+'"/></g>';
+    if(v!==0) s += '<text x="'+(ln.x2+8)+'" y="'+(ln.y+3.5)+'" font-family="'+FONT+'" font-size="9.5" fill="#C0392B" font-weight="700">'+ln.opts[v+1]+'</text>';
+    s += '<text x="'+(ln.x1-6)+'" y="'+(ln.y+3.5)+'" text-anchor="end" font-family="'+FONT+'" font-size="8.5" fill="#A8A8A8">'+ln.label.split(" ")[0]+'</text>';
+  });
+  s += '<text x="110" y="462" text-anchor="middle" font-family="'+FONT+'" font-size="12" fill="#555555" font-weight="600">전면 정렬 (Frontal)</text>';
+  return s+'</svg>';
+}
+
+function postureSideSVG(side){
+  const PL = 122;
+  const ear  = { x: PL - (side.fhp?17:0), y:44 };
+  const sh   = { x: PL - (side.rs?13:0),  y:94 };
+  const hip  = { x: PL + (side.pt===-1?9: side.pt===1?-9:0), y:232 };
+  const knee = { x: PL + (side.khe?10:0), y:332 };
+  const ank  = { x: PL, y:414 };
+  const tkOff = side.tk?15:4;
+  const llOff = side.ll===1?15: side.ll===-1?0:6;
+  const path = 'M '+ear.x+' '+ear.y
+    +' Q '+((ear.x+sh.x)/2+(side.tk?8:2))+' '+((ear.y+sh.y)/2)+' '+sh.x+' '+sh.y
+    +' C '+(sh.x+tkOff)+' 145 '+(hip.x-llOff)+' 196 '+hip.x+' '+hip.y
+    +' L '+knee.x+' '+knee.y+' L '+ank.x+' '+ank.y;
+  const pts = [
+    { p:ear,  name:"귀 (Ear)",            dev: side.fhp?"전방":"" },
+    { p:sh,   name:"어깨 (Acromion)",      dev: side.rs?"전방":"" },
+    { p:hip,  name:"고관절 (Trochanter)",  dev: side.pt===1?"전방경사": side.pt===-1?"후방경사":"" },
+    { p:knee, name:"무릎",                 dev: side.khe?"과신전":"" },
+    { p:ank,  name:"복사뼈 (Malleolus)",   dev:"" },
+  ];
+  let s = '<svg class="fig" viewBox="0 0 220 470" xmlns="http://www.w3.org/2000/svg">';
+  s += '<rect width="220" height="470" fill="#FFFFFF"/>';
+  s += '<rect x="0.8" y="0.8" width="218.4" height="468.4" fill="none" stroke="#DADADA" stroke-width="1.6" rx="6"/>';
+  /* 중립 기준선(PL=122)에 회색 측면 실루엣의 몸통·골반·하지 중심을 정렬 */
+  s += '<g opacity="0.14"><ellipse cx="116" cy="42" rx="20" ry="24" fill="#2A2A2A"/>'
+     + '<path d="M112,64 C108,74 100,84 100,100 C100,130 104,150 108,170 C110,186 108,204 110,224 C111,240 116,246 122,248 C130,250 138,244 140,230 C142,206 144,180 144,150 C144,120 142,96 134,80 C130,72 128,66 128,62 Z" fill="#2A2A2A"/>'
+     + '<path d="M120,246 C116,280 114,310 116,336 C117,362 118,388 118,410 L108,424 L134,424 L130,336 L136,248 Z" fill="#2A2A2A"/></g>';
+  s += '<line x1="'+PL+'" y1="14" x2="'+PL+'" y2="438" stroke="'+LINE+'" stroke-width="1.3" stroke-dasharray="6 5" opacity="0.7"/>';
+  s += '<text x="'+(PL+5)+'" y="22" font-family="'+FONT+'" font-size="8.5" fill="#555555">기준선</text>';
+  s += '<path d="'+path+'" fill="none" stroke="#C0392B" stroke-width="2.6" stroke-linecap="round" opacity="0.9"/>';
+  pts.forEach(o=>{
+    const dev = !!o.dev;
+    s += '<circle cx="'+o.p.x+'" cy="'+o.p.y+'" r="5" fill="'+(dev?"#C0392B":"#3A3A3A")+'" stroke="#fff" stroke-width="1.6"/>';
+    s += '<text x="18" y="'+(o.p.y+3.5)+'" font-family="'+FONT+'" font-size="8.8" fill="#8A8A8A">'+o.name+'</text>';
+    if(dev) s += '<text x="'+(o.p.x-10)+'" y="'+(o.p.y-9)+'" text-anchor="end" font-family="'+FONT+'" font-size="9.5" fill="#C0392B" font-weight="700">'+o.dev+'</text>';
+  });
+  if(side.tk) s += '<text x="'+(sh.x+24)+'" y="140" font-family="'+FONT+'" font-size="9.5" font-weight="700" fill="#C0392B">후만↑</text>';
+  if(side.ll===1) s += '<text x="'+(hip.x-26)+'" y="198" text-anchor="end" font-family="'+FONT+'" font-size="9.5" font-weight="700" fill="#C0392B">전만↑</text>';
+  if(side.ll===-1) s += '<text x="'+(hip.x-26)+'" y="198" text-anchor="end" font-family="'+FONT+'" font-size="9.5" font-weight="700" fill="#C0392B">전만↓</text>';
+  s += '<text x="110" y="462" text-anchor="middle" font-family="'+FONT+'" font-size="12" fill="#555555" font-weight="600">측면 정렬 (Sagittal)</text>';
+  return s+'</svg>';
+}
+
+function postureFindings(){
+  const out = [];
+  FRONT_LINES.forEach(ln=>{ const v=S.front[ln.id]||0; if(v!==0) out.push(ln.label.split(" ")[0]+" — "+ln.opts[v+1]); });
+  SIDE_ITEMS.forEach(it=>{
+    const v=S.side[it.id]||0;
+    if(it.three){ if(v!==0) out.push(it.label+" — "+it.opts[v+1]); }
+    else if(v) out.push(it.label+" 관찰됨");
+  });
+  return out;
+}
+
+/* ════════ 렌더링 ════════ */
+function renderTools(){
+  document.getElementById("tools").innerHTML = TOOLS.map(t=>{
+    const on = S.tool===t.id;
+    return '<button class="tool-btn'+(on?" active":"")+'" style="'+(on?("border-color:"+t.color+";background:"+t.color+"12"):"")+'" onclick="setTool(\''+t.id+'\')">'
+      + '<span class="sym" style="color:'+t.color+'">'+t.hint+'</span><span class="nm">'+t.label+'</span></button>';
+  }).join("");
+}
+function updateRadiateStatus(step=1){
+  const el = document.getElementById("radiateStatus");
+  if(!el) return;
+  if(S.tool!=="radiate"){
+    el.style.display="none";
+    return;
+  }
+  el.style.display="block";
+  el.textContent = step===2 ? "② 방사되는 끝점을 터치하세요" : "① 방사통 시작점을 터치하세요";
+}
+function clearRadiateStart(){
+  radiateStart = null;
+  ["front","back"].forEach(v=>{
+    const rs=document.getElementById("rs-"+v);
+    if(rs) rs.style.display="none";
+  });
+  updateRadiateStatus(1);
+}
+function showRadiateStart(view,p){
+  ["front","back"].forEach(v=>{
+    const rs=document.getElementById("rs-"+v);
+    if(rs) rs.style.display="none";
+  });
+  const rs=document.getElementById("rs-"+view);
+  if(rs){
+    rs.setAttribute("cx",p.x);
+    rs.setAttribute("cy",p.y);
+    rs.style.display="block";
+  }
+}
+function setTool(id){
+  clearRadiateStart();
+  S.tool=id;
+  renderTools();
+  updateRadiateStatus(1);
+  if(id==="radiate") showToast("시작점을 터치하세요");
+  scheduleAutosave();
+}
+
+function cloneMarkers(){ return JSON.parse(JSON.stringify(S.markers)); }
+function pushHistory(){
+  historyStack.push(cloneMarkers());
+  if(historyStack.length>60) historyStack.shift();
+  redoStack=[];
+}
+function renderMarkers(){
+  ["front","back"].forEach(v=>{
+    const g = document.getElementById("mk-"+v);
+    if(g) g.innerHTML = S.markers.filter(m=>m.view===v).map(m=>markerSVG(m,v)).join("");
+  });
+  document.getElementById("btnUndo").disabled = !historyStack.length;
+  document.getElementById("btnRedo").disabled = !redoStack.length;
+  document.getElementById("btnClear").disabled = !S.markers.length;
+  scheduleAutosave();
+}
+function undoAction(){
+  clearRadiateStart();
+  if(!historyStack.length) return;
+  redoStack.push(cloneMarkers());
+  S.markers = historyStack.pop();
+  renderMarkers();
+}
+function redoAction(){
+  clearRadiateStart();
+  if(!redoStack.length) return;
+  historyStack.push(cloneMarkers());
+  S.markers = redoStack.pop();
+  renderMarkers();
+}
+async function requestClearMarks(){
+  clearRadiateStart();
+  if(!S.markers.length) return;
+  const ok = await showConfirm("모든 통증 표시를 삭제할까요?", "삭제한 표시는 되돌리기로 한 번 복구할 수 있습니다.", true);
+  if(!ok) return;
+  pushHistory();
+  S.markers=[];
+  renderMarkers();
+}
+
+function renderPosture(){
+  document.getElementById("fig-pfront").innerHTML = postureFrontSVG(S.front);
+  document.getElementById("fig-pside").innerHTML  = postureSideSVG(S.side);
+  const f = postureFindings();
+  document.getElementById("findingsBox").innerHTML = f.length
+    ? "<ul>"+f.map(x=>"<li>"+esc(x)+"</li>").join("")+"</ul>"
+    : '<div class="none">특이 소견 없음</div>';
+}
+
+function segHTML(containerId, items, stateObj){
+  document.getElementById(containerId).innerHTML = items.map(it=>{
+    const cur = stateObj[it.id]||0;
+    const three = it.three || it.opts.length===3;
+    const btns = it.opts.map((o,i)=>{
+      const val = three ? i-1 : i;
+      return '<button class="'+(cur===val?"on":"")+'" onclick="setSeg(\''+containerId+'\',\''+it.id+'\','+val+')">'+o+'</button>';
+    }).join("");
+    return '<div class="seg-item"><div class="seg-title">'+it.label+'</div><div class="seg">'+btns+'</div></div>';
+  }).join("");
+}
+function setSeg(containerId,id,val){
+  if(containerId==="segFront") S.front[id]=val; else S.side[id]=val;
+  segHTML("segFront",FRONT_LINES.map(l=>({id:l.id,label:l.label,opts:l.opts,three:true})),S.front);
+  segHTML("segSide",SIDE_ITEMS,S.side);
+  renderPosture();
+  scheduleAutosave();
+}
+
+function setTab(t){
+  clearRadiateStart();
+  S.tab=t;
+  document.getElementById("tab-pain").classList.toggle("active",t==="pain");
+  document.getElementById("tab-posture").classList.toggle("active",t==="posture");
+  document.getElementById("pane-pain").style.display = t==="pain"?"block":"none";
+  document.getElementById("pane-posture").style.display = t==="posture"?"block":"none";
+  scheduleAutosave();
+}
+
+function showToast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.style.display = "block";
+  clearTimeout(el._t); el._t = setTimeout(()=>el.style.display="none",2400);
+}
+
+/* ════════ 포인터 (터치/마우스) ════════ */
+function svgPoint(svg,e){
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+  return { x: Math.round(p.x*10)/10, y: Math.round(p.y*10)/10 };
+}
+function handleChartTap(svg,view,e){
+  const p = svgPoint(svg,e);
+  const touch = e.pointerType === "touch";
+
+  if(S.tool==="erase"){
+    clearRadiateStart();
+    let best=null, bd = touch ? 24 : 17;
+    const segDist = (px,py,x1,y1,x2,y2)=>{
+      const dx=x2-x1, dy=y2-y1;
+      if(dx===0 && dy===0) return Math.hypot(px-x1,py-y1);
+      let t=((px-x1)*dx+(py-y1)*dy)/(dx*dx+dy*dy);
+      t=Math.max(0,Math.min(1,t));
+      return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
+    };
+    S.markers.forEach(m=>{
+      if(m.view!==view) return;
+      const d = m.type==="radiate" ? segDist(p.x,p.y,m.x,m.y,m.x2,m.y2) : Math.hypot(m.x-p.x,m.y-p.y);
+      if(d<bd){ bd=d; best=m.id; }
+    });
+    if(best!==null){
+      pushHistory();
+      S.markers = S.markers.filter(m=>m.id!==best);
+      renderMarkers();
+    }
+    return;
+  }
+
+  if(S.tool==="radiate"){
+    if(!radiateStart){
+      radiateStart = {view,x:p.x,y:p.y};
+      showRadiateStart(view,p);
+      updateRadiateStatus(2);
+      showToast("이제 방사되는 끝점을 터치하세요");
+      return;
+    }
+
+    if(radiateStart.view!==view){
+      radiateStart = {view,x:p.x,y:p.y};
+      showRadiateStart(view,p);
+      updateRadiateStatus(2);
+      showToast("시작점을 다시 선택했습니다");
+      return;
+    }
+
+    const d = Math.hypot(p.x-radiateStart.x,p.y-radiateStart.y);
+    if(d<=12){
+      showToast("끝점을 조금 더 떨어진 곳에 터치하세요");
+      return;
+    }
+    pushHistory();
+    S.markers.push({
+      id:S.nextId++, view, type:"radiate",
+      x:radiateStart.x, y:radiateStart.y, x2:p.x, y2:p.y
+    });
+    clearRadiateStart();
+    renderMarkers();
+    showToast("방사통 표시 완료");
+    return;
+  }
+
+  clearRadiateStart();
+  pushHistory();
+  S.markers.push({id:S.nextId++,view,type:S.tool,x:p.x,y:p.y});
+  renderMarkers();
+}
+
+function attachPointer(svg,view){
+  let press=null;
+  svg.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse" && e.button!==0) return;
+    press={id:e.pointerId,x:e.clientX,y:e.clientY,time:Date.now()};
+  });
+  svg.addEventListener("pointerup",e=>{
+    if(!press || press.id!==e.pointerId) return;
+    const dx=e.clientX-press.x, dy=e.clientY-press.y;
+    const moved=Math.hypot(dx,dy);
+    const elapsed=Date.now()-press.time;
+    press=null;
+    if(moved>10 || elapsed>900) return;
+    e.preventDefault();
+    handleChartTap(svg,view,e);
+  });
+  svg.addEventListener("pointercancel",()=>{ press=null; });
+  svg.addEventListener("lostpointercapture",()=>{ press=null; });
+}
+
+/* ════════ PNG 내보내기 ════════ */
+function legendSymbol(type,x,y){
+  const c = TOOL[type].color;
+  if(type==="ache") return '<circle cx="'+x+'" cy="'+y+'" r="6.5" fill="'+c+'" fill-opacity="0.85"/>';
+  if(type==="sharp") return '<g stroke="'+c+'" stroke-width="3" stroke-linecap="round"><line x1="'+(x-5)+'" y1="'+(y-5)+'" x2="'+(x+5)+'" y2="'+(y+5)+'"/><line x1="'+(x-5)+'" y1="'+(y+5)+'" x2="'+(x+5)+'" y2="'+(y-5)+'"/></g>';
+  if(type==="numb") return '<g fill="'+c+'"><circle cx="'+x+'" cy="'+(y-3.5)+'" r="2.4"/><circle cx="'+(x-4)+'" cy="'+(y+3)+'" r="2.4"/><circle cx="'+(x+4)+'" cy="'+(y+3)+'" r="2.4"/></g>';
+  if(type==="stiff") return '<g><rect x="'+(x-6)+'" y="'+(y-6)+'" width="12" height="12" rx="2" fill="none" stroke="'+c+'" stroke-width="2"/><line x1="'+(x-5)+'" y1="'+(y+4)+'" x2="'+(x+4)+'" y2="'+(y-5)+'" stroke="'+c+'" stroke-width="1.8"/></g>';
+  if(type==="radiate") return '<g stroke="'+c+'" stroke-width="3" stroke-linecap="round"><line x1="'+(x-7)+'" y1="'+y+'" x2="'+(x+5)+'" y2="'+y+'"/><path d="M '+(x+3)+' '+(y-4)+' L '+(x+9)+' '+y+' L '+(x+3)+' '+(y+4)+'" fill="none" stroke-width="2.4"/></g>';
+  return "";
+}
+function wrapText(s,n){
+  const lines = [];
+  (s||"").split("\n").forEach(raw=>{
+    let cur = raw;
+    while(cur.length>n){ lines.push(cur.slice(0,n)); cur=cur.slice(n); }
+    lines.push(cur);
+  });
+  return lines.filter((l,i)=>l!==""||i<lines.length-1).slice(0,8);
+}
+function nestedFig(svgStr,x,y,w,h){
+  return svgStr.replace(/^<svg[^>]*>/,'<svg x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" viewBox="0 0 220 470" xmlns="http://www.w3.org/2000/svg">')
+               .replace(/style="display:none"/g,'display="none"');
+}
+
+function buildExport(mode){
+  const W = 840, FIG_W = 250, FIG_H = 534;
+  const painH = 690, postH = 660, headH = 132;
+  const both = mode==="all";
+  const H = headH + (mode!=="posture"?painH:0) + (mode!=="pain"?postH:0) + 46;
+  const info = {
+    name: document.getElementById("fName").value,
+    date: document.getElementById("fDate").value,
+    clinic: document.getElementById("fClinic").value,
+    memo: document.getElementById("fMemo").value,
+  };
+  const counts = {};
+  S.markers.forEach(m=>counts[m.type]=(counts[m.type]||0)+1);
+  const titleTxt = mode==="pain" ? "통증 바디차트" : mode==="posture" ? "자세·정렬 관찰" : "통증 바디차트 · 자세·정렬 관찰";
+
+  let s = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="'+FONT+'">';
+  s += '<rect width="'+W+'" height="'+H+'" fill="#FFFFFF"/>';
+  /* 헤더 — 블랙 밴드, 큰 제목 + 작은 로고 */
+  s += '<rect width="'+W+'" height="78" fill="#0B0B0B"/>';
+  s += '<text x="32" y="40" fill="#FFFFFF" font-size="22" font-weight="800">'+titleTxt+'</text>';
+  s += '<text x="32" y="62" fill="#AAAAAA" font-size="11.5">'+esc(info.clinic)+'</text>';
+  s += '<image x="'+(W-76)+'" y="17" width="44" height="44" href="'+LOGO+'" preserveAspectRatio="xMidYMid slice"/>';
+  s += '<text x="'+(W-88)+'" y="38" text-anchor="end" fill="#FFFFFF" font-size="12" font-weight="800" letter-spacing="0.5">MOA BUSAN</text>';
+  s += '<text x="'+(W-88)+'" y="54" text-anchor="end" fill="#888888" font-size="7.5" letter-spacing="1">EVIDENCE · TOGETHER · EXCELLENCE</text>';
+  /* 환자 정보 */
+  s += '<text x="32" y="112" font-size="14" fill="'+INK+'"><tspan font-weight="700">이름/코드</tspan>  '+(esc(info.name)||"________")+'    <tspan font-weight="700">평가일</tspan>  '+esc(info.date)+'</text>';
+  if(mode!=="posture"){
+    s += '<rect x="'+(W-176)+'" y="92" width="144" height="30" rx="15" fill="'+nrsColor(S.nrs)+'" fill-opacity="0.12"/>';
+    s += '<text x="'+(W-104)+'" y="112" text-anchor="middle" font-size="14" font-weight="700" fill="'+nrsColor(S.nrs)+'">NRS '+S.nrs+' / 10</text>';
+  }
+  s += '<line x1="32" y1="'+(headH-4)+'" x2="'+(W-32)+'" y2="'+(headH-4)+'" stroke="#E0E0E0" stroke-width="1.5"/>';
+
+  let y0 = headH + 8;
+  if(mode!=="posture"){
+    s += nestedFig(painFigureSVG("front","ex-front",S.markers),40,y0,FIG_W,FIG_H);
+    s += nestedFig(painFigureSVG("back","ex-back",S.markers),312,y0,FIG_W,FIG_H);
+    let ly = y0+16;
+    s += '<text x="592" y="'+ly+'" font-size="13" font-weight="700" fill="'+INK+'">범례</text>'; ly+=24;
+    TOOLS.filter(t=>t.id!=="erase").forEach(t=>{
+      s += legendSymbol(t.id,600,ly-4);
+      s += '<text x="618" y="'+ly+'" font-size="12" fill="'+INK+'">'+t.label+(counts[t.id]?("  ×"+counts[t.id]):"")+'</text>';
+      ly += 26;
+    });
+    ly += 10;
+    s += '<text x="592" y="'+ly+'" font-size="13" font-weight="700" fill="'+INK+'">메모</text>';
+    s += '<rect x="590" y="'+(ly+10)+'" width="216" height="188" rx="8" fill="#F7F7F7" stroke="#E0E0E0"/>';
+    wrapText(info.memo,15).forEach((l,i)=>{
+      s += '<text x="602" y="'+(ly+34+i*22)+'" font-size="12" fill="#3A3A3A">'+esc(l)+'</text>';
+    });
+    y0 += FIG_H + 26;
+    if(both){
+      s += '<line x1="32" y1="'+y0+'" x2="'+(W-32)+'" y2="'+y0+'" stroke="#E0E0E0" stroke-width="1.5"/>';
+      s += '<text x="32" y="'+(y0+30)+'" font-size="16" font-weight="700" fill="'+INK+'">자세·정렬 관찰</text>';
+      y0 += 44;
+    }
+  }
+  if(mode!=="pain"){
+    s += nestedFig(postureFrontSVG(S.front),40,y0,FIG_W,FIG_H);
+    s += nestedFig(postureSideSVG(S.side),312,y0,FIG_W,FIG_H);
+    let fy = y0+16;
+    s += '<text x="592" y="'+fy+'" font-size="13" font-weight="700" fill="'+INK+'">정렬 소견</text>'; fy+=26;
+    const fnd = postureFindings();
+    if(!fnd.length) s += '<text x="592" y="'+fy+'" font-size="12" fill="#8A8A8A">특이 소견 없음</text>';
+    fnd.slice(0,14).forEach(f=>{
+      s += '<circle cx="597" cy="'+(fy-4)+'" r="2.5" fill="#C0392B"/>';
+      s += '<text x="608" y="'+fy+'" font-size="12" fill="'+INK+'">'+esc(f)+'</text>';
+      fy += 24;
+    });
+    y0 += FIG_H;
+  }
+  s += '<text x="32" y="'+(H-16)+'" font-size="10" fill="#9A9A9A">'+CREDIT+'</text>';
+  s += '<text x="'+(W-32)+'" y="'+(H-16)+'" text-anchor="end" font-size="10" fill="#9A9A9A">'+esc(info.date)+'</text>';
+  s += '</svg>';
+  return { svg:s, W, H };
+}
+
+function exportFileName(mode){
+  const nm = (document.getElementById("fName").value||"").trim().replace(/[\\/:*?"<>|]+/g,"_");
+  const tag = mode==="pain"?"바디차트": mode==="posture"?"정렬관찰":"통합리포트";
+  return tag+"_"+(nm?nm+"_":"")+document.getElementById("fDate").value+".png";
+}
+function buildPNGBlob(mode){
+  return new Promise((resolve,reject)=>{
+    const b = buildExport(mode);
+    const blob = new Blob([b.svg],{type:"image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{
+      const scale = 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = b.W*scale; canvas.height = b.H*scale;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(bb=>{
+        if(!bb) return reject(new Error("PNG 생성 실패"));
+        resolve({blob:bb,fileName:exportFileName(mode),mode});
+      },"image/png",0.96);
+    };
+    img.onerror = ()=>{URL.revokeObjectURL(url); reject(new Error("이미지 생성 실패"));};
+    img.src = url;
+  });
+}
+function downloadBlob(blob,fileName){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=fileName; a.rel="noopener";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),8000);
+}
+function openExportSheet(){
+  document.getElementById("currentTabSaveLabel").textContent = S.tab==="pain"?"통증 차트 저장":"자세·정렬 관찰 저장";
+  document.getElementById("exportSheetBackdrop").style.display="flex";
+}
+function openMoreSheet(){
+  updateInstallState(); updateNetworkState();
+  document.getElementById("moreSheetBackdrop").style.display="flex";
+}
+function closeSheet(id){document.getElementById(id).style.display="none";}
+function sheetBackdropClose(e,id){if(e.target===e.currentTarget) closeSheet(id);}
+function showBusy(text){document.getElementById("busyText").textContent=text||"처리 중...";document.getElementById("busyOverlay").style.display="flex";}
+function hideBusy(){document.getElementById("busyOverlay").style.display="none";}
+async function prepareExport(mode){
+  closeSheet("exportSheetBackdrop");
+  showBusy("결과 이미지를 만드는 중...");
+  try{
+    const asset=await buildPNGBlob(mode);
+    if(preparedExport&&preparedExport.url) URL.revokeObjectURL(preparedExport.url);
+    asset.url=URL.createObjectURL(asset.blob); preparedExport=asset;
+    document.getElementById("exportPreviewImage").src=asset.url;
+    document.getElementById("previewTitle").textContent=mode==="all"?"통합 리포트 미리보기":(mode==="pain"?"통증 차트 미리보기":"자세·정렬 관찰 미리보기");
+    const canFileShare=canShareFiles(asset);
+    document.getElementById("shareExportBtn").textContent=canFileShare?"사진 저장·공유":"사진 저장";
+    document.getElementById("previewNote").textContent=isIOSDevice()?"아이폰에서는 ‘사진 저장·공유’를 누른 뒤 공유창에서 ‘이미지 저장’을 선택하면 사진 앱에 저장할 수 있습니다.":"‘사진 저장·공유’는 기기의 공유 기능을 사용합니다. 지원되지 않는 경우 PNG 다운로드를 사용하세요.";
+    document.getElementById("previewBackdrop").style.display="flex";
+  }catch(e){showToast("이미지 생성에 실패했습니다. 다시 시도해 주세요.");}
+  finally{hideBusy();}
+}
+function closePreview(){
+  closeSheet("previewBackdrop");
+  if(preparedExport&&preparedExport.url){URL.revokeObjectURL(preparedExport.url);preparedExport.url=null;}
+}
+function canShareFiles(asset=preparedExport){
+  if(!asset||!navigator.share||!navigator.canShare) return false;
+  try{const f=new File([asset.blob],asset.fileName,{type:"image/png"});return navigator.canShare({files:[f]});}catch(e){return false;}
+}
+async function sharePreparedExport(){
+  if(!preparedExport) return;
+  if(canShareFiles(preparedExport)){
+    try{
+      const file=new File([preparedExport.blob],preparedExport.fileName,{type:"image/png"});
+      await navigator.share({files:[file],title:"MOA Bodychart",text:"MOA Bodychart 결과 이미지"});
+      showToast("공유 창을 열었습니다");
+    }catch(e){if(e&&e.name!=="AbortError") downloadPreparedExport();}
+  }else{
+    downloadPreparedExport();
+  }
+}
+function downloadPreparedExport(){
+  if(!preparedExport) return;
+  downloadBlob(preparedExport.blob,preparedExport.fileName);
+  showToast(isIOSDevice()?"PNG 파일을 저장했습니다. 파일 앱의 다운로드 항목도 확인해 주세요.":"PNG 파일을 다운로드했습니다");
+}
+/* 기존 호출 호환용 */
+async function downloadPNG(mode){
+  showBusy("PNG를 만드는 중...");
+  try{const a=await buildPNGBlob(mode);downloadBlob(a.blob,a.fileName);showToast("PNG 파일을 다운로드했습니다");}
+  catch(e){showToast("이미지 생성에 실패했습니다. 다시 시도해 주세요.");}
+  finally{hideBusy();}
+}
+
+/* ════════ NRS ════════ */
+document.getElementById("nrsSlider").addEventListener("input",e=>{
+  S.nrs = +e.target.value;
+  const b = document.getElementById("nrsBadge");
+  b.textContent = S.nrs;
+  b.style.background = nrsColor(S.nrs)+"1A";
+  b.style.color = nrsColor(S.nrs);
+  e.target.style.accentColor = nrsColor(S.nrs);
+  scheduleAutosave();
+});
+
+/* ════════ 자동저장 · 복구 · 새 평가 ════════ */
+function collectDraft(){
+  return {
+    savedAt:new Date().toISOString(),
+    state:{tab:S.tab,tool:S.tool,markers:S.markers,nextId:S.nextId,nrs:S.nrs,front:S.front,side:S.side},
+    fields:{
+      name:document.getElementById("fName").value,
+      date:document.getElementById("fDate").value,
+      clinic:document.getElementById("fClinic").value,
+      memo:document.getElementById("fMemo").value
+    }
+  };
+}
+function isMeaningfulDraft(d){
+  const f=d.fields||{}, st=d.state||{};
+  const hasFields=!!((f.name||"").trim() || (f.memo||"").trim());
+  const hasMarkers=Array.isArray(st.markers) && st.markers.length>0;
+  const hasFront=st.front && Object.values(st.front).some(v=>v!==0);
+  const hasSide=st.side && Object.values(st.side).some(v=>v!==0);
+  return hasFields || hasMarkers || hasFront || hasSide || st.nrs!==5;
+}
+function scheduleAutosave(){
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(()=>{
+    try{
+      const draft=collectDraft();
+      if(isMeaningfulDraft(draft)) localStorage.setItem(STORAGE_KEY,JSON.stringify(draft));
+      else localStorage.removeItem(STORAGE_KEY);
+    }catch(e){}
+  },250);
+}
+function applyDraft(d){
+  if(!d||!d.state) return;
+  const st=d.state;
+  S.tab=st.tab||"pain"; S.tool=st.tool||"ache"; S.markers=Array.isArray(st.markers)?st.markers:[];
+  S.nextId=st.nextId||((Math.max(0,...S.markers.map(m=>m.id||0)))+1); S.nrs=Number.isFinite(st.nrs)?st.nrs:5;
+  S.front=Object.assign({head:0,shoulder:0,pelvis:0,knee:0},st.front||{});
+  S.side=Object.assign({fhp:0,rs:0,tk:0,ll:0,pt:0,khe:0},st.side||{});
+  const f=d.fields||{};
+  document.getElementById("fName").value=f.name||"";
+  document.getElementById("fDate").value=f.date||todayStr();
+  document.getElementById("fClinic").value=f.clinic||"반여넘버원 마취통증의학과";
+  document.getElementById("fMemo").value=f.memo||"";
+  document.getElementById("nrsSlider").value=S.nrs;
+  const b=document.getElementById("nrsBadge"); b.textContent=S.nrs; b.style.background=nrsColor(S.nrs)+"1A"; b.style.color=nrsColor(S.nrs);
+  document.getElementById("nrsSlider").style.accentColor=nrsColor(S.nrs);
+  historyStack=[]; redoStack=[];
+  renderTools(); updateRadiateStatus(1); renderMarkers();
+  segHTML("segFront",FRONT_LINES.map(l=>({id:l.id,label:l.label,opts:l.opts,three:true})),S.front);
+  segHTML("segSide",SIDE_ITEMS,S.side);
+  renderPosture(); setTab(S.tab);
+}
+function restoreRecovery(){
+  if(pendingRecovery) applyDraft(pendingRecovery);
+  pendingRecovery=null; document.getElementById("recoveryBanner").style.display="none";
+  showToast("이전 작업을 복구했습니다"); scheduleAutosave();
+}
+function discardRecovery(){
+  pendingRecovery=null; try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  document.getElementById("recoveryBanner").style.display="none";
+  showToast("이전 작업을 삭제했습니다");
+}
+async function requestNewEvaluation(){
+  const ok=await showConfirm("새 평가를 시작할까요?", "현재 입력한 내용과 통증 표시는 초기화됩니다. 필요한 결과 이미지를 저장하거나 데이터 백업을 먼저 해 주세요.", true);
+  if(!ok) return;
+  historyStack=[]; redoStack=[];
+  S.tab="pain"; S.tool="ache"; S.markers=[]; S.nextId=1; S.nrs=5;
+  S.front={head:0,shoulder:0,pelvis:0,knee:0};
+  S.side={fhp:0,rs:0,tk:0,ll:0,pt:0,khe:0};
+  document.getElementById("fName").value="";
+  document.getElementById("fDate").value=todayStr();
+  document.getElementById("fMemo").value="";
+  document.getElementById("nrsSlider").value=5;
+  applyDraft(collectDraft());
+  clearTimeout(autosaveTimer);
+  try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  showToast("새 평가를 시작했습니다");
+}
+function showConfirm(title,message,danger=false){
+  document.getElementById("confirmTitle").textContent=title;
+  document.getElementById("confirmMessage").textContent=message;
+  document.getElementById("confirmOk").classList.toggle("danger",danger);
+  document.getElementById("confirmOk").textContent=danger?"삭제 / 초기화":"확인";
+  document.getElementById("confirmBackdrop").style.display="flex";
+  return new Promise(resolve=>{confirmResolver=resolve;});
+}
+function closeConfirm(result){
+  document.getElementById("confirmBackdrop").style.display="none";
+  const r=confirmResolver; confirmResolver=null; if(r) r(result);
+}
+function backdropCancel(e){ if(e.target===e.currentTarget) closeConfirm(false); }
+
+
+/* ════════ 백업 · PWA 설치 · 자동 업데이트 ════════ */
+function isIOSDevice(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==="MacIntel")&&navigator.maxTouchPoints>1);}
+function isStandaloneMode(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
+function dismissPrivacyNotice(){try{localStorage.setItem(PRIVACY_NOTICE_KEY,"1");}catch(e){} document.getElementById("privacyBanner").style.display="none";}
+function showPrivacyNoticeIfNeeded(){try{if(!localStorage.getItem(PRIVACY_NOTICE_KEY)) document.getElementById("privacyBanner").style.display="flex";}catch(e){}}
+function makeBackupPayload(){return {app:"MOA Bodychart",schemaVersion:BACKUP_SCHEMA_VERSION,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),draft:collectDraft()};}
+function exportBackup(){
+  try{
+    const payload=makeBackupPayload();
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const d=todayStr(); const name=(payload.draft.fields&&payload.draft.fields.name||"").trim().replace(/[\\/:*?"<>|]+/g,"_");
+    downloadBlob(blob,"MOA_Bodychart_백업_"+(name?name+"_":"")+d+".json");
+    showToast("백업 파일을 저장했습니다");
+  }catch(e){showToast("백업 파일을 만들지 못했습니다");}
+}
+function triggerRestoreBackup(){closeSheet("moreSheetBackdrop");document.getElementById("backupFileInput").click();}
+async function handleBackupFile(input){
+  const file=input.files&&input.files[0]; input.value=""; if(!file) return;
+  try{
+    const txt=await file.text(); const data=JSON.parse(txt);
+    const draft=data&&data.draft?data.draft:data;
+    if(!draft||!draft.state) throw new Error("invalid backup");
+    const ok=await showConfirm("백업을 복원할까요?","현재 작성 중인 내용은 백업 파일의 내용으로 바뀝니다.",false);
+    if(!ok) return;
+    applyDraft(draft); try{localStorage.setItem(STORAGE_KEY,JSON.stringify(draft));}catch(e){}
+    showToast("백업을 복원했습니다");
+  }catch(e){showToast("MOA Bodychart 백업 파일을 확인해 주세요");}
+}
+function updateInstallState(){
+  const desc=document.getElementById("installDesc"); if(!desc) return;
+  if(isStandaloneMode()) desc.textContent="현재 웹앱으로 실행 중입니다.";
+  else if(deferredInstallPrompt) desc.textContent="이 기기에 바로 설치할 수 있습니다.";
+  else if(isIOSDevice()) desc.textContent="Safari 공유 버튼 → 홈 화면에 추가";
+  else desc.textContent="브라우저 메뉴에서 앱 설치 또는 홈 화면 추가";
+}
+async function installWebApp(){
+  closeSheet("moreSheetBackdrop");
+  if(isStandaloneMode()){showToast("이미 웹앱으로 실행 중입니다");return;}
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    try{await deferredInstallPrompt.userChoice;}catch(e){}
+    deferredInstallPrompt=null; updateInstallState(); return;
+  }
+  const txt=isIOSDevice()?"1. Safari에서 이 페이지를 엽니다.\n2. 하단의 공유 버튼(□↑)을 누릅니다.\n3. ‘홈 화면에 추가’를 선택합니다.\n4. 추가 후 홈 화면의 MOA Bodychart 아이콘으로 실행합니다.":"브라우저 메뉴(⋮ 또는 공유 메뉴)에서 ‘앱 설치’ 또는 ‘홈 화면에 추가’를 선택하세요.";
+  document.getElementById("installHelpText").textContent=txt;
+  document.getElementById("installHelpBackdrop").style.display="flex";
+}
+function updateNetworkState(){
+  const on=navigator.onLine; const dot=document.getElementById("networkDot"), txt=document.getElementById("networkText");
+  if(dot) dot.classList.toggle("offline",!on); if(txt) txt.textContent=on?"온라인":"오프라인";
+}
+function showUpdateBanner(info){
+  updateAvailable=true; remoteVersionInfo=info||remoteVersionInfo;
+  const t=document.getElementById("updateText");
+  if(t&&remoteVersionInfo&&remoteVersionInfo.version) t.textContent="v"+remoteVersionInfo.version+" 업데이트가 준비되었습니다. 적용 전 백업을 권장합니다.";
+  document.getElementById("updateBanner").style.display="flex";
+}
+async function fetchRemoteVersion(){
+  try{
+    const r=await fetch("./version.json?ts="+Date.now(),{cache:"no-store"}); if(!r.ok) return null;
+    return await r.json();
+  }catch(e){return null;}
+}
+async function checkForUpdates(manual=false){
+  closeSheet("moreSheetBackdrop");
+  if(manual) showToast("업데이트를 확인하는 중...");
+  try{
+    const info=await fetchRemoteVersion();
+    if(info&&info.version&&info.version!==APP_VERSION){showUpdateBanner(info);return true;}
+    if(swRegistration){
+      await swRegistration.update();
+      if(swRegistration.waiting){showUpdateBanner(info||{version:"새 버전"});return true;}
+    }
+    if(manual) showToast("현재 최신 버전입니다");
+  }catch(e){if(manual) showToast("업데이트 확인에 실패했습니다");}
+  return false;
+}
+async function applyAppUpdate(){
+  showBusy("업데이트를 적용하는 중...");
+  try{
+    if(swRegistration){
+      await swRegistration.update();
+      if(swRegistration.waiting){swRegistration.waiting.postMessage({type:"SKIP_WAITING"});return;}
+    }
+    const v=(remoteVersionInfo&&remoteVersionInfo.version)||Date.now();
+    window.location.replace("./?updated="+encodeURIComponent(v));
+  }catch(e){hideBusy();window.location.reload();}
+}
+async function registerPWA(){
+  if(!("serviceWorker" in navigator)||location.protocol==="file:") return;
+  try{
+    swRegistration=await navigator.serviceWorker.register("./sw.js");
+    if(swRegistration.waiting) showUpdateBanner();
+    swRegistration.addEventListener("updatefound",()=>{
+      const w=swRegistration.installing; if(!w) return;
+      w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller) showUpdateBanner();});
+    });
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(controllerReloading) return; controllerReloading=true; window.location.reload();
+    });
+    setTimeout(()=>checkForUpdates(false),1800);
+    setInterval(()=>checkForUpdates(false),30*60*1000);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") checkForUpdates(false);});
+  }catch(e){}
+}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;updateInstallState();});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;updateInstallState();showToast("MOA Bodychart를 설치했습니다");});
+window.addEventListener("online",()=>{updateNetworkState();showToast("온라인으로 연결되었습니다");});
+window.addEventListener("offline",()=>{updateNetworkState();showToast("오프라인 모드입니다");});
+
+/* ════════ 초기화 ════════ */
+function init(){
+  document.getElementById("fDate").value = todayStr();
+  ["fName","fDate","fClinic","fMemo"].forEach(id=>document.getElementById(id).addEventListener("input",scheduleAutosave));
+  renderTools();
+  updateRadiateStatus(1);
+  document.getElementById("fig-front").innerHTML = painFigureSVG("front","front",S.markers);
+  document.getElementById("fig-back").innerHTML  = painFigureSVG("back","back",S.markers);
+  attachPointer(document.querySelector("#fig-front svg"),"front");
+  attachPointer(document.querySelector("#fig-back svg"),"back");
+  renderMarkers();
+  segHTML("segFront",FRONT_LINES.map(l=>({id:l.id,label:l.label,opts:l.opts,three:true})),S.front);
+  segHTML("segSide",SIDE_ITEMS,S.side);
+  renderPosture();
+  const b = document.getElementById("nrsBadge");
+  b.style.background = nrsColor(5)+"1A"; b.style.color = nrsColor(5);
+  document.getElementById("nrsSlider").style.accentColor = nrsColor(5);
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){ pendingRecovery=JSON.parse(raw); document.getElementById("recoveryBanner").style.display="flex"; }
+  }catch(e){}
+  document.getElementById("footerVersion").textContent="v"+APP_VERSION;
+  document.getElementById("appVersionText").textContent="v"+APP_VERSION;
+  showPrivacyNoticeIfNeeded();
+  updateNetworkState();
+  updateInstallState();
+  registerPWA();
+}
+init();
+</script>
+</body>
+</html>
