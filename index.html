@@ -477,7 +477,7 @@
 <script>
 /* ════════ 상태 ════════ */
 
-const APP_VERSION = "1.1.5";
+const APP_VERSION = "1.1.6";
 const BACKUP_SCHEMA_VERSION = 2;
 const PRIVACY_NOTICE_KEY = "moaBodychartPrivacyNoticeV1";
 let swRegistration = null;
@@ -882,12 +882,23 @@ function handleChartTap(svg,view,e){
 }
 
 function attachPointer(svg,view){
-  let press=null;
+  const isDesktopFinePointer = window.matchMedia("(pointer: fine)").matches && window.innerWidth > 900;
 
+  /* 데스크톱: 클릭만 처리. 휠/트랙패드 스크롤은 브라우저에 완전히 맡긴다. */
+  if(isDesktopFinePointer){
+    svg.addEventListener("click",e=>{
+      if(e.button!==0) return;
+      handleChartTap(svg,view,e);
+    });
+    return;
+  }
+
+  /* 모바일/터치: 짧은 탭만 표시로 처리하고 스와이프는 페이지 스크롤로 남긴다. */
+  let press=null;
   svg.addEventListener("pointerdown",e=>{
     if(e.pointerType==="mouse" && e.button!==0) return;
     press={id:e.pointerId,x:e.clientX,y:e.clientY,time:Date.now()};
-  });
+  },{passive:true});
   svg.addEventListener("pointerup",e=>{
     if(!press || press.id!==e.pointerId) return;
     const dx=e.clientX-press.x, dy=e.clientY-press.y;
@@ -895,11 +906,9 @@ function attachPointer(svg,view){
     const elapsed=Date.now()-press.time;
     press=null;
     if(moved>10 || elapsed>900) return;
-    e.preventDefault();
     handleChartTap(svg,view,e);
-  });
-  svg.addEventListener("pointercancel",()=>{ press=null; });
-  svg.addEventListener("lostpointercapture",()=>{ press=null; });
+  },{passive:true});
+  svg.addEventListener("pointercancel",()=>{ press=null; },{passive:true});
 }
 
 /* ════════ PNG 내보내기 ════════ */

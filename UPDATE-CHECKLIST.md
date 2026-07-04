@@ -1,11 +1,8 @@
-# MOA Bodychart v1.1.5 업데이트 체크리스트
+# MOA Bodychart v1.1.6 업데이트 체크리스트
 
-- [ ] 기존 데이터 전체 백업
-- [ ] 5개 업데이트 파일 GitHub에 업로드
-- [ ] Commit changes
-- [ ] GitHub Pages 배포 성공 확인
-- [ ] Chrome 데스크톱에서 마우스를 바디차트 위에 둔 채 휠 스크롤 확인
-- [ ] Chrome 데스크톱 트랙패드 스크롤 확인
-- [ ] Safari 데스크톱 스크롤 확인
-- [ ] 모바일 터치로 통증 표시 확인
-- [ ] 더보기 → 업데이트 확인으로 v1.1.5 확인
+1. GitHub에 index.html, version.json, sw.js, README.md, UPDATE-CHECKLIST.md 업로드
+2. Commit changes
+3. Pages 배포 완료 확인
+4. Chrome 데스크톱에서 차트 위에 마우스를 올리고 휠/트랙패드 스크롤 확인
+5. 차트 클릭 시 마커 입력 확인
+6. 모바일에서 탭 입력과 세로 스크롤 확인
