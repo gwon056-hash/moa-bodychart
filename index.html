@@ -480,7 +480,7 @@
 <script>
 /* ════════ 상태 ════════ */
 
-const APP_VERSION = "1.1.7";
+const APP_VERSION = "1.1.8";
 const BACKUP_SCHEMA_VERSION = 2;
 const PRIVACY_NOTICE_KEY = "moaBodychartPrivacyNoticeV1";
 let swRegistration = null;
@@ -1503,6 +1503,23 @@ async function registerPWA(){
   }, {passive:true, capture:true});
 })();
 
+/* ════════ 모바일 설치형 앱 세로 방향 고정 ════════
+   매니페스트의 portrait-primary가 기본이며, 지원되는 안드로이드 설치형 PWA에서만
+   Screen Orientation API를 보조적으로 시도한다. 실패해도 앱 동작에는 영향이 없다. */
+function isStandaloneDisplay(){
+  return window.matchMedia("(display-mode: standalone)").matches
+    || window.matchMedia("(display-mode: fullscreen)").matches
+    || window.navigator.standalone === true;
+}
+async function lockPortraitIfSupported(){
+  if(!isStandaloneDisplay() || !window.matchMedia("(pointer: coarse)").matches) return;
+  try{
+    if(screen.orientation && typeof screen.orientation.lock === "function"){
+      await screen.orientation.lock("portrait-primary");
+    }
+  }catch(e){}
+}
+
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;updateInstallState();});
 window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;updateInstallState();showToast("MOA Bodychart를 설치했습니다");});
 window.addEventListener("online",()=>{updateNetworkState();showToast("온라인으로 연결되었습니다");});
@@ -1538,6 +1555,8 @@ function init(){
   updateSaveButtonState();
   updateSavedEvaluationCount();
   registerPWA();
+  lockPortraitIfSupported();
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible") lockPortraitIfSupported();});
 }
 init();
 </script>

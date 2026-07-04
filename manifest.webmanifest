@@ -6,10 +6,14 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#F3F3F3",
   "theme_color": "#0B0B0B",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "./icons/icon-192.png",

@@ -1,12 +1,12 @@
-# MOA Bodychart PWA v1.1.7
+# MOA Bodychart PWA v1.1.8
 
-## v1.1.7 변경사항
-- 데스크톱 Chrome의 바디차트 입력 이벤트를 `click` 전용으로 분리
-- 데스크톱에서 `pointerdown`/`pointerup` 입력 감시 제거
-- 차트 위 마우스 휠·트랙패드 스크롤을 브라우저 기본 동작에 완전히 위임
-- 모바일은 짧은 탭만 마커 입력, 스와이프는 페이지 스크롤 유지
-- 기존 평가 저장·검색·백업·전면 정렬 수정 기능 유지
+## v1.1.8 변경사항
+- 안드로이드 설치형 PWA를 세로 화면(`portrait-primary`)으로 고정
+- 기존 `orientation: any` 설정 제거
+- 지원되는 설치형 모바일 환경에서 Screen Orientation API 보조 적용
+- 기기 기울기에 따른 의도치 않은 가로/세로 전환 방지
+- 기존 Chrome 스크롤, 평가 저장·검색·백업, 전면 정렬 수정 기능 유지
 
-
-- v1.1.7: Chrome 데스크톱 휠 스크롤 호환성 개선(overscroll reset + non-blocking fallback).
-Latest version: v1.1.7
+## 중요
+기존에 홈 화면에 설치한 안드로이드 PWA는 매니페스트 변경 반영이 늦을 수 있습니다.
+업데이트 후 앱을 완전히 종료하고 다시 실행하세요. 그래도 회전되면 홈 화면 앱을 한 번 삭제한 뒤 Chrome에서 다시 설치하세요.
