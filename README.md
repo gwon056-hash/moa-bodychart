@@ -9,3 +9,4 @@
 
 
 - v1.1.7: Chrome 데스크톱 휠 스크롤 호환성 개선(overscroll reset + non-blocking fallback).
+Latest version: v1.1.7
