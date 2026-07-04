@@ -128,6 +128,12 @@
   .fld:focus{border-color:var(--black)}
   textarea.fld{min-height:84px;resize:vertical;margin-bottom:0}
 
+  /* 날짜 입력칸: 캘린더 기능은 유지하고 표시 폭만 컴팩트하게 */
+  #fDate{display:block;width:190px;max-width:100%;min-width:0}
+  @media(max-width:900px){
+    #fDate{width:180px;max-width:100%;min-width:0;min-height:44px;padding:9px 10px;font-size:16px}
+  }
+
   /* 도구 버튼 */
   .tools{display:grid;grid-template-columns:1fr 1fr;gap:7px}
   .tool-btn{display:flex;align-items:center;gap:8px;padding:11px 10px;border-radius:10px;border:2px solid #E8E8E8;background:#fff;text-align:left}
@@ -229,6 +235,45 @@
     .preview-stage{max-height:62dvh}
   }
 
+
+  /* ── 평가별 저장 · 검색 ── */
+  .saved-sheet{width:min(720px,100%);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;min-height:360px}
+  .saved-sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .saved-sheet-head h3{margin:0 0 4px;font-size:18px}
+  .saved-sheet-head .sub{margin:0}
+  .saved-search-wrap{position:relative;margin:12px 0 8px}
+  .saved-search-wrap input{width:100%;height:46px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:0 14px 0 40px;font-size:14px;outline:none;color:var(--ink)}
+  .saved-search-wrap input:focus{border-color:var(--black)}
+  .saved-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:19px;color:#777;pointer-events:none}
+  .saved-summary{font-size:11.5px;color:#777;margin:0 2px 8px}
+  .saved-list{display:grid;gap:9px;overflow:auto;min-height:120px;padding:1px 2px 3px;overscroll-behavior:contain}
+  .saved-empty{border:1.5px dashed #D8D8D8;border-radius:14px;padding:34px 18px;text-align:center;color:#888;font-size:13px;line-height:1.6;background:#FAFAFA}
+  .saved-item{border:1.5px solid var(--line);border-radius:14px;padding:13px;background:#fff}
+  .saved-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .saved-name{font-size:15px;font-weight:800;color:var(--ink);word-break:break-word}
+  .saved-date{font-size:12px;color:#777;margin-top:3px}
+  .saved-nrs{flex:0 0 auto;min-width:66px;text-align:center;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:800}
+  .saved-meta{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:10px;font-size:11px;color:#777;line-height:1.45}
+  .saved-meta span{white-space:nowrap}
+  .saved-memo{margin-top:8px;font-size:11.5px;color:#666;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .saved-actions{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:11px}
+  .saved-actions button{min-height:42px;border-radius:10px;font-size:12.5px;font-weight:800}
+  .saved-open{border:none;background:#0B0B0B;color:#fff}
+  .saved-delete{border:1.5px solid #E7CFCF;background:#fff;color:#B23A3A;padding:0 15px}
+  .saved-save-state{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#777;margin-left:5px}
+  .saved-save-state::before{content:"";width:6px;height:6px;border-radius:50%;background:#2E8B57}
+
+  @media(max-width:900px){
+    .top-actions{grid-template-columns:repeat(6,minmax(0,1fr))}
+    .top-actions button{grid-column:span 2}
+    .top-actions button:nth-child(4),.top-actions button:nth-child(5){grid-column:span 3}
+    .saved-sheet{width:100%;max-height:92dvh;min-height:62dvh;border-radius:20px 20px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+    .saved-search-wrap input{font-size:16px}
+    .saved-list{flex:1}
+    .saved-item{padding:12px}
+    .saved-name{font-size:14px}
+  }
+
 </style>
 </head>
 <body>
@@ -243,6 +288,8 @@
   </div>
   <div class="top-actions">
     <button class="btn-ghost" onclick="requestNewEvaluation()">새 평가</button>
+    <button class="btn-solid" id="saveEvaluationBtn" onclick="saveCurrentEvaluation()">평가 저장</button>
+    <button class="btn-ghost" onclick="openSavedEvaluations()">저장 목록</button>
     <button class="btn-solid" onclick="openExportSheet()">사진 저장</button>
     <button class="btn-ghost" onclick="openMoreSheet()">더보기</button>
   </div>
@@ -259,7 +306,7 @@
 </div>
 
 <div class="utility-banner privacy-banner" id="privacyBanner">
-  <div class="txt"><b>데이터 안내</b><br>입력 내용은 이 기기 브라우저에만 저장됩니다. 공용 배포판에서는 환자 실명보다 이름/코드 사용을 권장하며, 앱 삭제·브라우저 데이터 삭제·기기 변경 전 백업이 필요합니다.</div>
+  <div class="txt"><b>데이터 안내</b><br>입력 내용과 저장된 평가는 이 기기 브라우저에만 저장됩니다. 환자 실명보다 이름/코드 사용을 권장하며, 앱 삭제·브라우저 데이터 삭제·기기 변경 전 전체 백업이 필요합니다.</div>
   <div class="acts"><button onclick="dismissPrivacyNotice()">확인</button></div>
 </div>
 
@@ -303,7 +350,7 @@
           <span class="lbl">기록 정보</span>
           <input class="fld" id="fName" placeholder="환자 이름/코드">
           <input class="fld" id="fDate" type="date">
-          <input class="fld" id="fClinic" value="반여넘버원 마취통증의학과" placeholder="기관명">
+          <input class="fld" id="fClinic" placeholder="기관명 (선택)">
           <textarea class="fld" id="fMemo" placeholder="메모 (양상, 악화/완화 요인, 발생 시점 등)"></textarea>
         </div>
       </div>
@@ -337,7 +384,7 @@
   </div>
 </div>
 
-<div class="footer">MOA Bodychart PWA · © MOA BUSAN · @physio_geun_1<div class="version-chip" id="footerVersion">v1.0.0</div></div>
+<div class="footer">MOA Bodychart PWA · © MOA BUSAN · @physio_geun_1<div class="version-chip" id="footerVersion">v1.1.1</div></div>
 
 
 <div class="sheet-backdrop" id="exportSheetBackdrop" onclick="sheetBackdropClose(event,'exportSheetBackdrop')">
@@ -368,19 +415,35 @@
   </div>
 </div>
 
+<div class="sheet-backdrop" id="savedSheetBackdrop" onclick="sheetBackdropClose(event,'savedSheetBackdrop')">
+  <div class="action-sheet saved-sheet" role="dialog" aria-modal="true" aria-labelledby="savedSheetTitle">
+    <div class="saved-sheet-head">
+      <div><h3 id="savedSheetTitle">저장된 평가</h3><p class="sub">환자 이름·코드, 날짜, 메모로 찾을 수 있습니다.</p></div>
+      <button class="icon-close" onclick="closeSheet('savedSheetBackdrop')" aria-label="닫기">×</button>
+    </div>
+    <div class="saved-search-wrap">
+      <span class="saved-search-icon">⌕</span>
+      <input id="savedSearch" type="search" placeholder="환자 이름/코드 또는 날짜 검색" oninput="renderSavedEvaluations()" autocomplete="off">
+    </div>
+    <div class="saved-summary" id="savedSummary">저장된 평가 0개</div>
+    <div class="saved-list" id="savedList"></div>
+    <button class="sheet-close" onclick="closeSheet('savedSheetBackdrop')">닫기</button>
+  </div>
+</div>
+
 <div class="sheet-backdrop" id="moreSheetBackdrop" onclick="sheetBackdropClose(event,'moreSheetBackdrop')">
   <div class="action-sheet" role="dialog" aria-modal="true" aria-labelledby="moreSheetTitle">
     <h3 id="moreSheetTitle">웹앱 관리</h3>
-    <p class="sub">설치, 백업, 복원, 업데이트를 한곳에서 관리합니다.</p>
+    <p class="sub">설치, 전체 백업·복원, 업데이트를 한곳에서 관리합니다.</p>
     <div class="menu-group">
       <button class="sheet-option" onclick="installWebApp()"><span><div class="main">홈 화면에 설치</div><div class="desc" id="installDesc">웹앱처럼 전체 화면으로 사용합니다.</div></span><span class="chev">›</span></button>
-      <button class="sheet-option" onclick="exportBackup()"><span><div class="main">데이터 백업</div><div class="desc">현재 작성 중인 평가를 JSON 파일로 저장합니다.</div></span><span class="chev">›</span></button>
-      <button class="sheet-option" onclick="triggerRestoreBackup()"><span><div class="main">백업 복원</div><div class="desc">저장해 둔 MOA Bodychart 백업 파일을 불러옵니다.</div></span><span class="chev">›</span></button>
+      <button class="sheet-option" onclick="exportBackup()"><span><div class="main">전체 데이터 백업</div><div class="desc" id="backupMenuDesc">저장된 평가 전체와 현재 작업을 JSON 하나로 저장합니다.</div></span><span class="chev">›</span></button>
+      <button class="sheet-option" onclick="triggerRestoreBackup()"><span><div class="main">전체 백업 복원</div><div class="desc">기존 저장 평가와 안전하게 합쳐서 복원합니다.</div></span><span class="chev">›</span></button>
       <button class="sheet-option" onclick="checkForUpdates(true)"><span><div class="main">업데이트 확인</div><div class="desc">GitHub에 새 버전이 있는지 확인합니다.</div></span><span class="chev">›</span></button>
     </div>
     <div class="menu-footer">
-      <div class="status-line"><span><span class="status-dot" id="networkDot"></span><span id="networkText">온라인</span></span><span id="appVersionText">v1.0.0</span></div>
-      <div style="margin-top:6px">데이터는 이 기기에 저장됩니다. 업데이트·앱 삭제·기기 변경 전 백업을 권장합니다.</div>
+      <div class="status-line"><span><span class="status-dot" id="networkDot"></span><span id="networkText">온라인</span></span><span id="appVersionText">v1.1.1</span></div>
+      <div style="margin-top:6px">저장된 평가는 이 기기에 보관됩니다. 업데이트·앱 삭제·기기 변경 전 전체 백업을 권장합니다.</div>
     </div>
     <button class="sheet-close" onclick="closeSheet('moreSheetBackdrop')">닫기</button>
   </div>
@@ -413,8 +476,8 @@
 <script>
 /* ════════ 상태 ════════ */
 
-const APP_VERSION = "1.0.0";
-const BACKUP_SCHEMA_VERSION = 1;
+const APP_VERSION = "1.1.1";
+const BACKUP_SCHEMA_VERSION = 2;
 const PRIVACY_NOTICE_KEY = "moaBodychartPrivacyNoticeV1";
 let swRegistration = null;
 let deferredInstallPrompt = null;
@@ -464,6 +527,8 @@ let confirmResolver = null;
 let autosaveTimer = null;
 let pendingRecovery = null;
 const STORAGE_KEY = "moaBodychartDraftV2";
+const EVALUATIONS_KEY = "moaBodychartEvaluationsV1";
+let activeEvaluationId = null;
 
 const nrsColor = n => n>=7 ? "#C0392B" : n>=4 ? "#C77700" : "#1E7A4F";
 const esc = s => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -1042,10 +1107,11 @@ document.getElementById("nrsSlider").addEventListener("input",e=>{
   scheduleAutosave();
 });
 
-/* ════════ 자동저장 · 복구 · 새 평가 ════════ */
+/* ════════ 자동저장 · 평가별 저장 · 검색 · 복구 ════════ */
 function collectDraft(){
   return {
     savedAt:new Date().toISOString(),
+    activeEvaluationId:activeEvaluationId,
     state:{tab:S.tab,tool:S.tool,markers:S.markers,nextId:S.nextId,nrs:S.nrs,front:S.front,side:S.side},
     fields:{
       name:document.getElementById("fName").value,
@@ -1057,7 +1123,7 @@ function collectDraft(){
 }
 function isMeaningfulDraft(d){
   const f=d.fields||{}, st=d.state||{};
-  const hasFields=!!((f.name||"").trim() || (f.memo||"").trim());
+  const hasFields=!!((f.name||"").trim() || (f.clinic||"").trim() || (f.memo||"").trim());
   const hasMarkers=Array.isArray(st.markers) && st.markers.length>0;
   const hasFront=st.front && Object.values(st.front).some(v=>v!==0);
   const hasSide=st.side && Object.values(st.side).some(v=>v!==0);
@@ -1076,6 +1142,7 @@ function scheduleAutosave(){
 function applyDraft(d){
   if(!d||!d.state) return;
   const st=d.state;
+  activeEvaluationId=d.activeEvaluationId||d.id||null;
   S.tab=st.tab||"pain"; S.tool=st.tool||"ache"; S.markers=Array.isArray(st.markers)?st.markers:[];
   S.nextId=st.nextId||((Math.max(0,...S.markers.map(m=>m.id||0)))+1); S.nrs=Number.isFinite(st.nrs)?st.nrs:5;
   S.front=Object.assign({head:0,shoulder:0,pelvis:0,knee:0},st.front||{});
@@ -1083,7 +1150,7 @@ function applyDraft(d){
   const f=d.fields||{};
   document.getElementById("fName").value=f.name||"";
   document.getElementById("fDate").value=f.date||todayStr();
-  document.getElementById("fClinic").value=f.clinic||"반여넘버원 마취통증의학과";
+  document.getElementById("fClinic").value=f.clinic||"";
   document.getElementById("fMemo").value=f.memo||"";
   document.getElementById("nrsSlider").value=S.nrs;
   const b=document.getElementById("nrsBadge"); b.textContent=S.nrs; b.style.background=nrsColor(S.nrs)+"1A"; b.style.color=nrsColor(S.nrs);
@@ -1092,7 +1159,7 @@ function applyDraft(d){
   renderTools(); updateRadiateStatus(1); renderMarkers();
   segHTML("segFront",FRONT_LINES.map(l=>({id:l.id,label:l.label,opts:l.opts,three:true})),S.front);
   segHTML("segSide",SIDE_ITEMS,S.side);
-  renderPosture(); setTab(S.tab);
+  renderPosture(); setTab(S.tab); updateSaveButtonState();
 }
 function restoreRecovery(){
   if(pendingRecovery) applyDraft(pendingRecovery);
@@ -1104,27 +1171,151 @@ function discardRecovery(){
   document.getElementById("recoveryBanner").style.display="none";
   showToast("이전 작업을 삭제했습니다");
 }
-async function requestNewEvaluation(){
-  const ok=await showConfirm("새 평가를 시작할까요?", "현재 입력한 내용과 통증 표시는 초기화됩니다. 필요한 결과 이미지를 저장하거나 데이터 백업을 먼저 해 주세요.", true);
+function loadEvaluations(){
+  try{
+    const data=JSON.parse(localStorage.getItem(EVALUATIONS_KEY)||"[]");
+    return Array.isArray(data)?data:[];
+  }catch(e){return [];}
+}
+function persistEvaluations(list){
+  localStorage.setItem(EVALUATIONS_KEY,JSON.stringify(Array.isArray(list)?list:[]));
+}
+function createEvaluationId(){
+  return "eval_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);
+}
+function updateSaveButtonState(){
+  const btn=document.getElementById("saveEvaluationBtn"); if(!btn) return;
+  btn.textContent=activeEvaluationId?"평가 업데이트":"평가 저장";
+}
+function savedFindingCount(ev){
+  const st=ev.state||{};
+  const front=st.front?Object.values(st.front).filter(v=>v!==0).length:0;
+  const side=st.side?Object.values(st.side).filter(v=>v!==0).length:0;
+  return front+side;
+}
+function updateSavedEvaluationCount(){
+  const count=loadEvaluations().length;
+  const desc=document.getElementById("backupMenuDesc");
+  if(desc) desc.textContent="저장된 평가 "+count+"개와 현재 작업을 JSON 하나로 저장합니다.";
+}
+function saveCurrentEvaluation(){
+  try{
+    const draft=collectDraft();
+    if(!isMeaningfulDraft(draft)){showToast("저장할 평가 내용이 없습니다");return;}
+    const list=loadEvaluations();
+    const now=new Date().toISOString();
+    let idx=activeEvaluationId?list.findIndex(x=>x.id===activeEvaluationId):-1;
+    const id=idx>=0?activeEvaluationId:createEvaluationId();
+    const old=idx>=0?list[idx]:null;
+    const record={
+      id:id,
+      createdAt:old&&old.createdAt?old.createdAt:now,
+      updatedAt:now,
+      state:JSON.parse(JSON.stringify(draft.state)),
+      fields:JSON.parse(JSON.stringify(draft.fields))
+    };
+    if(idx>=0) list[idx]=record; else list.push(record);
+    list.sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+    persistEvaluations(list);
+    activeEvaluationId=id;
+    updateSaveButtonState(); updateSavedEvaluationCount(); scheduleAutosave();
+    showToast(idx>=0?"저장된 평가를 업데이트했습니다":"평가를 저장했습니다");
+  }catch(e){
+    showToast("평가를 저장하지 못했습니다. 기기 저장 공간을 확인해 주세요");
+  }
+}
+function formatSavedTime(iso){
+  try{
+    const d=new Date(iso); if(Number.isNaN(d.getTime())) return "";
+    const now=new Date();
+    const same=now.toDateString()===d.toDateString();
+    return same?("오늘 "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")):
+      (String(d.getFullYear())+"."+String(d.getMonth()+1).padStart(2,"0")+"."+String(d.getDate()).padStart(2,"0"));
+  }catch(e){return "";}
+}
+function renderSavedEvaluations(){
+  const listEl=document.getElementById("savedList"); if(!listEl) return;
+  const q=((document.getElementById("savedSearch")||{}).value||"").trim().toLowerCase();
+  const all=loadEvaluations().sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+  const filtered=all.filter(ev=>{
+    if(!q) return true;
+    const f=ev.fields||{};
+    return [f.name,f.date,f.clinic,f.memo].join(" ").toLowerCase().includes(q);
+  });
+  const summary=document.getElementById("savedSummary");
+  if(summary) summary.textContent=q?("검색 결과 "+filtered.length+"개 · 전체 "+all.length+"개"):("저장된 평가 "+all.length+"개");
+  if(!filtered.length){
+    listEl.innerHTML='<div class="saved-empty">'+(q?'검색 결과가 없습니다.<br>다른 이름·코드 또는 날짜를 입력해 보세요.':'아직 저장된 평가가 없습니다.<br>현재 평가에서 ‘평가 저장’을 누르면 여기에 쌓입니다.')+'</div>';
+    return;
+  }
+  listEl.innerHTML=filtered.map(ev=>{
+    const f=ev.fields||{}, st=ev.state||{};
+    const name=esc((f.name||"").trim()||"이름/코드 없음");
+    const date=esc(f.date||"날짜 없음");
+    const clinic=(f.clinic||"").trim();
+    const memo=(f.memo||"").trim();
+    const markers=Array.isArray(st.markers)?st.markers.length:0;
+    const findings=savedFindingCount(ev);
+    const nrs=Number.isFinite(st.nrs)?st.nrs:5;
+    const active=activeEvaluationId===ev.id?'<span class="saved-save-state">현재 열림</span>':'';
+    return '<div class="saved-item">'
+      +'<div class="saved-item-top"><div><div class="saved-name">'+name+active+'</div><div class="saved-date">'+date+(clinic?' · '+esc(clinic):'')+'</div></div>'
+      +'<div class="saved-nrs" style="background:'+nrsColor(nrs)+'1A;color:'+nrsColor(nrs)+'">NRS '+nrs+'</div></div>'
+      +'<div class="saved-meta"><span>통증 표시 '+markers+'개</span><span>정렬 소견 '+findings+'개</span><span>수정 '+esc(formatSavedTime(ev.updatedAt))+'</span></div>'
+      +(memo?'<div class="saved-memo">'+esc(memo)+'</div>':'')
+      +'<div class="saved-actions"><button class="saved-open" onclick="openSavedEvaluation(\''+ev.id+'\')">열기</button><button class="saved-delete" onclick="requestDeleteSavedEvaluation(\''+ev.id+'\')">삭제</button></div>'
+      +'</div>';
+  }).join("");
+}
+function openSavedEvaluations(){
+  const search=document.getElementById("savedSearch"); if(search) search.value="";
+  renderSavedEvaluations();
+  document.getElementById("savedSheetBackdrop").style.display="flex";
+}
+async function openSavedEvaluation(id){
+  const ev=loadEvaluations().find(x=>x.id===id); if(!ev) return;
+  if(activeEvaluationId!==id && isMeaningfulDraft(collectDraft())){
+    const ok=await showConfirm("저장된 평가를 열까요?","현재 작성 중인 내용은 화면에서 바뀝니다. 저장 목록에 남겨야 하는 작업이라면 먼저 ‘평가 저장’을 눌러 주세요.",false,"열기");
+    if(!ok) return;
+  }
+  applyDraft({id:ev.id,activeEvaluationId:ev.id,state:ev.state,fields:ev.fields,savedAt:ev.updatedAt});
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(collectDraft()));}catch(e){}
+  closeSheet("savedSheetBackdrop");
+  showToast("저장된 평가를 열었습니다");
+}
+async function requestDeleteSavedEvaluation(id){
+  const list=loadEvaluations(); const ev=list.find(x=>x.id===id); if(!ev) return;
+  const name=((ev.fields||{}).name||"이름/코드 없음").trim()||"이름/코드 없음";
+  const ok=await showConfirm("저장된 평가를 삭제할까요?",name+" · "+((ev.fields||{}).date||"날짜 없음")+"\n삭제한 평가는 되돌릴 수 없습니다.",true,"삭제");
   if(!ok) return;
-  historyStack=[]; redoStack=[];
+  persistEvaluations(list.filter(x=>x.id!==id));
+  if(activeEvaluationId===id){activeEvaluationId=null;updateSaveButtonState();scheduleAutosave();}
+  renderSavedEvaluations(); updateSavedEvaluationCount();
+  showToast("저장된 평가를 삭제했습니다");
+}
+async function requestNewEvaluation(){
+  const ok=await showConfirm("새 평가를 시작할까요?", "저장된 평가는 목록에 그대로 남습니다. 현재 작성 중인 내용은 초기화되므로, 필요한 작업이라면 먼저 ‘평가 저장’을 눌러 주세요.", true,"새 평가");
+  if(!ok) return;
+  historyStack=[]; redoStack=[]; activeEvaluationId=null;
   S.tab="pain"; S.tool="ache"; S.markers=[]; S.nextId=1; S.nrs=5;
   S.front={head:0,shoulder:0,pelvis:0,knee:0};
   S.side={fhp:0,rs:0,tk:0,ll:0,pt:0,khe:0};
   document.getElementById("fName").value="";
   document.getElementById("fDate").value=todayStr();
+  document.getElementById("fClinic").value="";
   document.getElementById("fMemo").value="";
   document.getElementById("nrsSlider").value=5;
   applyDraft(collectDraft());
   clearTimeout(autosaveTimer);
   try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  updateSaveButtonState();
   showToast("새 평가를 시작했습니다");
 }
-function showConfirm(title,message,danger=false){
+function showConfirm(title,message,danger=false,confirmLabel=""){
   document.getElementById("confirmTitle").textContent=title;
   document.getElementById("confirmMessage").textContent=message;
   document.getElementById("confirmOk").classList.toggle("danger",danger);
-  document.getElementById("confirmOk").textContent=danger?"삭제 / 초기화":"확인";
+  document.getElementById("confirmOk").textContent=confirmLabel||(danger?"삭제 / 초기화":"확인");
   document.getElementById("confirmBackdrop").style.display="flex";
   return new Promise(resolve=>{confirmResolver=resolve;});
 }
@@ -1140,27 +1331,62 @@ function isIOSDevice(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||((na
 function isStandaloneMode(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
 function dismissPrivacyNotice(){try{localStorage.setItem(PRIVACY_NOTICE_KEY,"1");}catch(e){} document.getElementById("privacyBanner").style.display="none";}
 function showPrivacyNoticeIfNeeded(){try{if(!localStorage.getItem(PRIVACY_NOTICE_KEY)) document.getElementById("privacyBanner").style.display="flex";}catch(e){}}
-function makeBackupPayload(){return {app:"MOA Bodychart",schemaVersion:BACKUP_SCHEMA_VERSION,appVersion:APP_VERSION,exportedAt:new Date().toISOString(),draft:collectDraft()};}
+function makeBackupPayload(){
+  return {
+    app:"MOA Bodychart",
+    schemaVersion:BACKUP_SCHEMA_VERSION,
+    appVersion:APP_VERSION,
+    exportedAt:new Date().toISOString(),
+    activeEvaluationId:activeEvaluationId,
+    evaluations:loadEvaluations(),
+    draft:collectDraft()
+  };
+}
 function exportBackup(){
   try{
     const payload=makeBackupPayload();
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-    const d=todayStr(); const name=(payload.draft.fields&&payload.draft.fields.name||"").trim().replace(/[\\/:*?"<>|]+/g,"_");
-    downloadBlob(blob,"MOA_Bodychart_백업_"+(name?name+"_":"")+d+".json");
-    showToast("백업 파일을 저장했습니다");
+    downloadBlob(blob,"MOA_Bodychart_전체백업_"+todayStr()+".json");
+    showToast("저장 평가 "+payload.evaluations.length+"개와 현재 작업을 백업했습니다");
   }catch(e){showToast("백업 파일을 만들지 못했습니다");}
 }
 function triggerRestoreBackup(){closeSheet("moreSheetBackdrop");document.getElementById("backupFileInput").click();}
+function normalizeEvaluationRecord(ev){
+  if(!ev||!ev.state) return null;
+  return {
+    id:ev.id||createEvaluationId(),
+    createdAt:ev.createdAt||ev.updatedAt||new Date().toISOString(),
+    updatedAt:ev.updatedAt||ev.savedAt||new Date().toISOString(),
+    state:ev.state,
+    fields:ev.fields||{}
+  };
+}
 async function handleBackupFile(input){
   const file=input.files&&input.files[0]; input.value=""; if(!file) return;
   try{
     const txt=await file.text(); const data=JSON.parse(txt);
-    const draft=data&&data.draft?data.draft:data;
-    if(!draft||!draft.state) throw new Error("invalid backup");
-    const ok=await showConfirm("백업을 복원할까요?","현재 작성 중인 내용은 백업 파일의 내용으로 바뀝니다.",false);
+    const incoming=Array.isArray(data&&data.evaluations)?data.evaluations.map(normalizeEvaluationRecord).filter(Boolean):[];
+    const draft=data&&data.draft?data.draft:(data&&data.state?data:null);
+    if(!incoming.length && (!draft||!draft.state)) throw new Error("invalid backup");
+    const msg="백업의 저장 평가 "+incoming.length+"개"+(draft&&draft.state?"와 현재 작업":"")+"을 복원합니다.\n기존 저장 평가는 지우지 않고 같은 ID의 평가는 더 최근 데이터로 합칩니다.";
+    const ok=await showConfirm("전체 백업을 복원할까요?",msg,false,"복원");
     if(!ok) return;
-    applyDraft(draft); try{localStorage.setItem(STORAGE_KEY,JSON.stringify(draft));}catch(e){}
-    showToast("백업을 복원했습니다");
+    if(incoming.length){
+      const map=new Map(loadEvaluations().map(ev=>[ev.id,ev]));
+      incoming.forEach(ev=>{
+        const old=map.get(ev.id);
+        if(!old || String(ev.updatedAt||"")>=String(old.updatedAt||"")) map.set(ev.id,ev);
+      });
+      const merged=[...map.values()].sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+      persistEvaluations(merged);
+    }
+    if(draft&&draft.state){
+      if(data&&data.activeEvaluationId && !draft.activeEvaluationId) draft.activeEvaluationId=data.activeEvaluationId;
+      applyDraft(draft);
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(collectDraft()));}catch(e){}
+    }
+    updateSavedEvaluationCount(); renderSavedEvaluations();
+    showToast("전체 백업을 복원했습니다");
   }catch(e){showToast("MOA Bodychart 백업 파일을 확인해 주세요");}
 }
 function updateInstallState(){
@@ -1248,6 +1474,7 @@ window.addEventListener("offline",()=>{updateNetworkState();showToast("오프라
 /* ════════ 초기화 ════════ */
 function init(){
   document.getElementById("fDate").value = todayStr();
+  document.getElementById("fClinic").value = "";
   ["fName","fDate","fClinic","fMemo"].forEach(id=>document.getElementById(id).addEventListener("input",scheduleAutosave));
   renderTools();
   updateRadiateStatus(1);
@@ -1271,6 +1498,8 @@ function init(){
   showPrivacyNoticeIfNeeded();
   updateNetworkState();
   updateInstallState();
+  updateSaveButtonState();
+  updateSavedEvaluationCount();
   registerPWA();
 }
 init();
