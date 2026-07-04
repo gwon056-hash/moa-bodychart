@@ -384,7 +384,7 @@
   </div>
 </div>
 
-<div class="footer">MOA Bodychart PWA · © MOA BUSAN · @physio_geun_1<div class="version-chip" id="footerVersion">v1.1.1</div></div>
+<div class="footer">MOA Bodychart PWA · © MOA BUSAN · @physio_geun_1<div class="version-chip" id="footerVersion">v1.1.2</div></div>
 
 
 <div class="sheet-backdrop" id="exportSheetBackdrop" onclick="sheetBackdropClose(event,'exportSheetBackdrop')">
@@ -442,7 +442,7 @@
       <button class="sheet-option" onclick="checkForUpdates(true)"><span><div class="main">업데이트 확인</div><div class="desc">GitHub에 새 버전이 있는지 확인합니다.</div></span><span class="chev">›</span></button>
     </div>
     <div class="menu-footer">
-      <div class="status-line"><span><span class="status-dot" id="networkDot"></span><span id="networkText">온라인</span></span><span id="appVersionText">v1.1.1</span></div>
+      <div class="status-line"><span><span class="status-dot" id="networkDot"></span><span id="networkText">온라인</span></span><span id="appVersionText">v1.1.2</span></div>
       <div style="margin-top:6px">저장된 평가는 이 기기에 보관됩니다. 업데이트·앱 삭제·기기 변경 전 전체 백업을 권장합니다.</div>
     </div>
     <button class="sheet-close" onclick="closeSheet('moreSheetBackdrop')">닫기</button>
@@ -476,7 +476,7 @@
 <script>
 /* ════════ 상태 ════════ */
 
-const APP_VERSION = "1.1.1";
+const APP_VERSION = "1.1.2";
 const BACKUP_SCHEMA_VERSION = 2;
 const PRIVACY_NOTICE_KEY = "moaBodychartPrivacyNoticeV1";
 let swRegistration = null;
@@ -610,7 +610,7 @@ function postureFrontSVG(front){
   s += '<line x1="110" y1="12" x2="110" y2="438" stroke="'+LINE+'" stroke-width="1.2" stroke-dasharray="6 5" opacity="0.55"/>';
   FRONT_LINES.forEach(ln=>{
     const v = front[ln.id]||0;
-    const angle = v * 4;
+    const angle = ln.id === "shoulder" ? -v * 4 : v * 4;
     const col = v!==0 ? "#C0392B" : "#3A3A3A";
     s += '<g transform="rotate('+angle+' 110 '+ln.y+')">'
        + '<line x1="'+ln.x1+'" y1="'+ln.y+'" x2="'+ln.x2+'" y2="'+ln.y+'" stroke="'+col+'" stroke-width="2.4" stroke-linecap="round"/>'
